@@ -1,0 +1,65 @@
+# Node.js / Angular (frontend)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+dist/
+coverage/
+.angular/
+# Optional Angular CLI project files
+.angular-cli.json
+angular.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Build directories for Spring Boot (backend)
+target/
+*.war
+*.jar
+
+# Spring Boot config files
+*.properties
+*.yml
+*.yaml
+
+# Snowflake
+.snowflake/
+*.snowsql
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Maven (if using Maven)
+*.mvn/
+
+# Gradle (if using Gradle)
+.gradle/
+build/
+
+# JetBrains Rider, PyCharm, WebStorm, etc.
+.idea/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Mac OS specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+
+# Environment variables
+.env
