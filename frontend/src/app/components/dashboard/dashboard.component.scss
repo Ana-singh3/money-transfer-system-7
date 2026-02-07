@@ -1,0 +1,235 @@
+.dashboard-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(to bottom, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    font-size: 1.125rem;
+    color: #7f8c8d;
+    margin: 0;
+  }
+}
+
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.balance-card {
+  padding: 2rem;
+  margin-bottom: 3rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin: 0;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    button {
+      color: white;
+    }
+  }
+
+  .balance-content {
+    .balance-amount {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      .currency {
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .amount {
+        font-size: 3.5rem;
+        font-weight: 700;
+      }
+    }
+
+    .account-id {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+
+    ::ng-deep .mat-mdc-progress-spinner circle {
+      stroke: white;
+    }
+  }
+}
+
+.quick-actions {
+  margin-bottom: 3rem;
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 1.5rem;
+  }
+
+  .action-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+
+    .action-card {
+      padding: 2rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+
+      &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .action-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 2rem;
+          width: 2rem;
+          height: 2rem;
+          color: white;
+        }
+
+        &.transfer {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        &.history {
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        &.refresh {
+          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+      }
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 0.5rem;
+      }
+
+      p {
+        color: #7f8c8d;
+        margin: 0;
+      }
+    }
+  }
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+
+  .info-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+
+    .info-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: #667eea;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      color: #7f8c8d;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .balance-card {
+    .balance-content {
+      .balance-amount {
+        .amount {
+          font-size: 2.5rem;
+        }
+      }
+    }
+  }
+
+  .quick-actions {
+    .action-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+}

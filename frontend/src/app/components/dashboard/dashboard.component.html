@@ -1,0 +1,89 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Welcome back, {{ holderName }}! 👋</h1>
+    <p>Manage your finances with ease</p>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Balance Card -->
+    <mat-card class="balance-card">
+      <div class="card-header">
+        <h2>
+          <mat-icon>account_balance_wallet</mat-icon>
+          Current Balance
+        </h2>
+        <button mat-icon-button (click)="refreshBalance()" matTooltip="Refresh balance">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      
+      <div class="balance-content" *ngIf="!loading; else loadingSpinner">
+        <div class="balance-amount">
+          <span class="currency">₹</span>
+          <span class="amount">{{ balance | number:'1.2-2' }}</span>
+        </div>
+        <p class="account-id">Account ID: {{ accountId }}</p>
+      </div>
+
+      <ng-template #loadingSpinner>
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </ng-template>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      
+      <div class="action-cards">
+        <mat-card class="action-card" (click)="navigateToTransfer()">
+          <div class="action-icon transfer">
+            <mat-icon>send</mat-icon>
+          </div>
+          <h3>Send Money</h3>
+          <p>Transfer funds to another account</p>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="navigateToHistory()">
+          <div class="action-icon history">
+            <mat-icon>history</mat-icon>
+          </div>
+          <h3>Transaction History</h3>
+          <p>View all your transactions</p>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="refreshBalance()">
+          <div class="action-icon refresh">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+          <h3>Check Balance</h3>
+          <p>Refresh your current balance</p>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-section">
+      <mat-card class="info-card">
+        <mat-icon class="info-icon">security</mat-icon>
+        <h3>Secure Transactions</h3>
+        <p>All transfers are encrypted and protected</p>
+      </mat-card>
+
+      <mat-card class="info-card">
+        <mat-icon class="info-icon">flash_on</mat-icon>
+        <h3>Instant Transfer</h3>
+        <p>Money reaches instantly</p>
+      </mat-card>
+
+      <mat-card class="info-card">
+        <mat-icon class="info-icon">verified_user</mat-icon>
+        <h3>100% Safe</h3>
+        <p>Bank-grade security standards</p>
+      </mat-card>
+    </div>
+  </div>
+</div>

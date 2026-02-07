@@ -1,0 +1,152 @@
+<app-navbar></app-navbar>
+
+<div class="transfer-container">
+  <div class="transfer-header">
+    <button mat-icon-button (click)="cancel()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>Send Money</h1>
+      <p>Transfer funds securely to another account</p>
+    </div>
+  </div>
+
+  <div class="transfer-content">
+    <!-- Account Info Card -->
+    <mat-card class="account-info-card">
+      <div class="info-header">
+        <mat-icon>account_circle</mat-icon>
+        <div>
+          <h3>{{ holderName }}</h3>
+          <p>Account ID: {{ accountId }}</p>
+        </div>
+      </div>
+    
+      <div class="balance-info">
+        <span class="label">Available Balance</span>
+        <span class="balance" *ngIf="!loadingBalance">
+          ₹{{ currentBalance | number:'1.2-2' }}
+        </span>
+        <mat-spinner *ngIf="loadingBalance" diameter="24"></mat-spinner>
+      </div>
+    </mat-card>
+
+    <!-- Transfer Form Card -->
+    <mat-card class="transfer-form-card">
+      <h2>
+        <mat-icon>send</mat-icon>
+        Transfer Details
+      </h2>
+
+      <form [formGroup]="transferForm" (ngSubmit)="onSubmit()" *ngIf="!transferSuccess">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Recipient Account ID</mat-label>
+          <input 
+            matInput 
+            formControlName="toAccountId" 
+            placeholder="Enter account ID"
+            type="number">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="f['toAccountId'].hasError('required')">
+            Account ID is required
+          </mat-error>
+          <mat-error *ngIf="f['toAccountId'].hasError('pattern')">
+            Please enter a valid account ID
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Amount</mat-label>
+          <input 
+            matInput 
+            formControlName="amount" 
+            placeholder="0.00"
+            type="number"
+            step="0.01">
+          <span matPrefix>₹&nbsp;</span>
+          <mat-icon matSuffix matTooltip="Enter amount to transfer">info</mat-icon>
+          <mat-error *ngIf="f['amount'].hasError('required')">
+            Amount is required
+          </mat-error>
+          <mat-error *ngIf="f['amount'].hasError('min')">
+            Amount must be greater than 0
+          </mat-error>
+          <mat-error *ngIf="f['amount'].hasError('pattern')">
+            Please enter a valid amount (up to 2 decimal places)
+          </mat-error>
+          <mat-hint>Maximum: ₹{{ currentBalance | number:'1.2-2' }}</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            type="button" 
+            (click)="cancel()"
+            [disabled]="loading">
+            Cancel
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="loading || transferForm.invalid">
+            <span *ngIf="!loading">
+              <mat-icon>send</mat-icon>
+              Transfer Money
+            </span>
+            <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div class="success-message" *ngIf="transferSuccess && transferResult">
+        <div class="success-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h3>Transfer Successful!</h3>
+        <div class="success-details">
+          <div class="detail-row">
+            <span class="label">Transaction ID:</span>
+            <span class="value">{{ transferResult.transactionId }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Amount:</span>
+            <span class="value">₹{{ transferResult.amount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">From Account:</span>
+            <span class="value">{{ transferResult.debitedFrom }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">To Account:</span>
+            <span class="value">{{ transferResult.creditedTo }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Status:</span>
+            <span class="value status-success">{{ transferResult.status }}</span>
+          </div>
+        </div>
+        <div class="success-actions">
+          <button mat-raised-button (click)="resetForm()">
+            <mat-icon>add</mat-icon>
+            New Transfer
+          </button>
+          <button mat-raised-button color="primary" (click)="cancel()">
+            <mat-icon>dashboard</mat-icon>
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Security Info -->
+    <div class="security-info">
+      <mat-icon>security</mat-icon>
+      <div>
+        <h4>Secure Transfer</h4>
+        <p>All transactions are encrypted and protected with bank-grade security</p>
+      </div>
+    </div>
+  </div>
+</div>

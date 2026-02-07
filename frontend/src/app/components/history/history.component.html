@@ -1,0 +1,116 @@
+<app-navbar></app-navbar>
+
+<div class="history-container">
+  <div class="history-header">
+    <div>
+      <h1>Transaction History</h1>
+      <p>View all your past transactions</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="refreshTransactions()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="history-content">
+    <mat-card class="transactions-card">
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading transactions...</p>
+      </div>
+
+      <!-- No Transactions State -->
+      <div class="empty-state" *ngIf="!loading && noTransactions">
+        <mat-icon>receipt_long</mat-icon>
+        <h3>No Transactions Yet</h3>
+        <p>Your transaction history will appear here once you make your first transfer</p>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="table-container" *ngIf="!loading && !noTransactions">
+        <table mat-table [dataSource]="transactions" class="transactions-table">
+          
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date & Time</th>
+            <td mat-cell *matCellDef="let transaction">
+              <div class="date-cell">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatDate(transaction.createdOn) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let transaction">
+              <mat-chip 
+                [class.debit-chip]="getTransactionType(transaction) === 'DEBIT'"
+                [class.credit-chip]="getTransactionType(transaction) === 'CREDIT'">
+                <mat-icon>{{ getTransactionType(transaction) === 'DEBIT' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                {{ getTransactionType(transaction) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Account Column -->
+          <ng-container matColumnDef="account">
+            <th mat-header-cell *matHeaderCellDef>Account</th>
+            <td mat-cell *matCellDef="let transaction">
+              <div class="account-cell">
+                <mat-icon>person</mat-icon>
+                <div>
+                  <span class="account-label">
+                    {{ getTransactionType(transaction) === 'DEBIT' ? 'To' : 'From' }}
+                  </span>
+                  <span class="account-number">{{ getOtherAccount(transaction) }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let transaction">
+              <span 
+                class="amount"
+                [class.debit-amount]="getTransactionType(transaction) === 'DEBIT'"
+                [class.credit-amount]="getTransactionType(transaction) === 'CREDIT'">
+                {{ getTransactionType(transaction) === 'DEBIT' ? '-' : '+' }}
+                ₹{{ transaction.amount | number:'1.2-2' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let transaction">
+              <mat-chip 
+                [class.success-status]="transaction.status === 'SUCCESS'"
+                [class.failed-status]="transaction.status === 'FAILED'">
+                <mat-icon>{{ transaction.status === 'SUCCESS' ? 'check_circle' : 'error' }}</mat-icon>
+                {{ transaction.status }}
+              </mat-chip>
+              <div class="failure-reason" *ngIf="transaction.failureReason">
+                <small>{{ transaction.failureReason }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Transaction Count -->
+      <div class="transaction-count" *ngIf="!loading && !noTransactions">
+        <mat-icon>info</mat-icon>
+        <span>Showing {{ transactions.length }} transaction(s)</span>
+      </div>
+    </mat-card>
+  </div>
+</div>
