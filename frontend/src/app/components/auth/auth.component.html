@@ -1,0 +1,216 @@
+<div class="auth-container">
+  <div class="auth-background" #backgroundShapes>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <mat-card class="auth-card" #authCard>
+    <div class="auth-header">
+      <div class="logo">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <h1>MoneyFlow</h1>
+      <p>Secure Money Transfer System</p>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-switcher">
+      <button 
+        class="mode-btn" 
+        [class.active]="authMode === 'signup'"
+        (click)="switchMode('signup')">
+        Sign Up
+      </button>
+      <button 
+        class="mode-btn" 
+        [class.active]="authMode === 'login'"
+        (click)="switchMode('login')">
+        Login
+      </button>
+      <button 
+        class="mode-btn" 
+        [class.active]="authMode === 'admin'"
+        (click)="switchMode('admin')">
+        Admin
+      </button>
+    </div>
+
+    <!-- Signup Form -->
+    <div *ngIf="authMode === 'signup'" class="auth-form-container">
+      <h2>Create Account</h2>
+      <form [formGroup]="signupForm" (ngSubmit)="onSignup()" class="auth-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            formControlName="username" 
+            placeholder="Choose a username"
+            autocomplete="username">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="signupF['username'].hasError('required')">
+            Username is required
+          </mat-error>
+          <mat-error *ngIf="signupF['username'].hasError('minlength')">
+            Username must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="hideSignupPassword ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Create a password"
+            autocomplete="new-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hideSignupPassword = !hideSignupPassword">
+            <mat-icon>{{hideSignupPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="signupF['password'].hasError('required')">
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="signupF['password'].hasError('minlength')">
+            Password must be at least 4 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input 
+            matInput 
+            [type]="hideSignupPassword ? 'password' : 'text'" 
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+            autocomplete="new-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error *ngIf="signupF['confirmPassword'].hasError('required')">
+            Please confirm your password
+          </mat-error>
+          <mat-error *ngIf="signupForm.hasError('passwordMismatch')">
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="auth-button"
+          [disabled]="loading || signupForm.invalid">
+          <span *ngIf="!loading">Create Account</span>
+          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </div>
+
+    <!-- Login Form -->
+    <div *ngIf="authMode === 'login'" class="auth-form-container">
+      <h2>Welcome Back</h2>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            formControlName="username" 
+            placeholder="Enter your username"
+            autocomplete="username">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="loginF['username'].hasError('required')">
+            Username is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="hidePassword ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hidePassword = !hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginF['password'].hasError('required')">
+            Password is required
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="auth-button"
+          [disabled]="loading || loginForm.invalid">
+          <span *ngIf="!loading">Sign In</span>
+          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </div>
+
+    <!-- Admin Login Form -->
+    <div *ngIf="authMode === 'admin'" class="auth-form-container">
+      <h2>Admin Access</h2>
+      <form [formGroup]="adminForm" (ngSubmit)="onAdminLogin()" class="auth-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Admin Username</mat-label>
+          <input 
+            matInput 
+            formControlName="username" 
+            placeholder="Enter admin username"
+            autocomplete="username">
+          <mat-icon matPrefix>admin_panel_settings</mat-icon>
+          <mat-error *ngIf="adminF['username'].hasError('required')">
+            Username is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="hideAdminPassword ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Enter admin password"
+            autocomplete="current-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hideAdminPassword = !hideAdminPassword">
+            <mat-icon>{{hideAdminPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="adminF['password'].hasError('required')">
+            Password is required
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="accent" 
+          type="submit" 
+          class="auth-button"
+          [disabled]="loading || adminForm.invalid">
+          <span *ngIf="!loading">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin Login
+          </span>
+          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </div>
+  </mat-card>
+</div>
+
