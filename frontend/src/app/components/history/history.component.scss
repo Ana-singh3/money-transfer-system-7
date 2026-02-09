@@ -1,0 +1,320 @@
+.history-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(to bottom, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem;
+}
+
+.history-header {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    color: #7f8c8d;
+    margin: 0;
+  }
+
+  button {
+    height: 48px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.history-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.transactions-card {
+  padding: 2rem;
+  border-radius: 16px;
+  min-height: 400px;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 0;
+
+    p {
+      margin-top: 1rem;
+      color: #7f8c8d;
+      font-size: 1.125rem;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+
+    mat-icon {
+      font-size: 5rem;
+      width: 5rem;
+      height: 5rem;
+      color: #d0d0d0;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0 0 0.5rem;
+    }
+
+    p {
+      color: #7f8c8d;
+      margin: 0;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    .transactions-table {
+      width: 100%;
+
+      th {
+        background-color: #f5f7fa;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        padding: 1rem;
+      }
+
+      td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      tr {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: #f5f7fa;
+          transform: translateX(4px);
+          box-shadow: -4px 0 0 0 #667eea;
+        }
+      }
+
+      .date-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        mat-icon {
+          color: #7f8c8d;
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+
+        span {
+          color: #2c3e50;
+          font-weight: 500;
+        }
+      }
+
+      mat-chip {
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+
+        &.debit-chip {
+          background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+          color: #c62828;
+          border: 1px solid rgba(198, 40, 40, 0.2);
+
+          mat-icon {
+            color: #c62828;
+          }
+          
+          &:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+          }
+        }
+
+        &.credit-chip {
+          background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+          color: #2e7d32;
+          border: 1px solid rgba(46, 125, 50, 0.2);
+
+          mat-icon {
+            color: #2e7d32;
+          }
+          
+          &:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+          }
+        }
+
+        &.success-status {
+          background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+          color: #2e7d32;
+          border: 1px solid rgba(46, 125, 50, 0.2);
+          animation: pulse-success 2s infinite;
+
+          mat-icon {
+            color: #2e7d32;
+          }
+          
+          @keyframes pulse-success {
+            0%, 100% {
+              box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+            }
+            50% {
+              box-shadow: 0 4px 16px rgba(46, 125, 50, 0.4);
+            }
+          }
+        }
+
+        &.failed-status {
+          background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+          color: #c62828;
+          border: 1px solid rgba(198, 40, 40, 0.2);
+
+          mat-icon {
+            color: #c62828;
+          }
+        }
+      }
+
+      .account-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        mat-icon {
+          color: #667eea;
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+
+        .account-label {
+          display: block;
+          font-size: 0.75rem;
+          color: #7f8c8d;
+          text-transform: uppercase;
+        }
+
+        .account-number {
+          display: block;
+          font-size: 1rem;
+          color: #2c3e50;
+          font-weight: 600;
+        }
+      }
+
+      .amount {
+        font-size: 1.125rem;
+        font-weight: 700;
+
+        &.debit-amount {
+          color: #c62828;
+        }
+
+        &.credit-amount {
+          color: #2e7d32;
+        }
+      }
+
+      .failure-reason {
+        margin-top: 0.25rem;
+
+        small {
+          color: #c62828;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+
+  .transaction-count {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+    color: #7f8c8d;
+
+    mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .history-container {
+    padding: 1rem;
+  }
+
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .transactions-card {
+    padding: 1rem;
+
+    .table-container {
+      .transactions-table {
+        th, td {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.875rem;
+        }
+
+        .date-cell,
+        .account-cell {
+          mat-icon {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
