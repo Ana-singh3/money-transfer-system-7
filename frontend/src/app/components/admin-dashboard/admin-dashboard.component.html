@@ -1,0 +1,96 @@
+<app-navbar></app-navbar>
+
+<div class="admin-dashboard-container">
+  <div class="admin-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Manage all user accounts</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="refreshAccounts()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="admin-content">
+    <mat-card class="accounts-card" #accountsCard>
+      <div class="card-header">
+        <h2>
+          <mat-icon>account_balance</mat-icon>
+          All Accounts ({{ accounts.length }})
+        </h2>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading accounts...</p>
+      </div>
+
+      <!-- Accounts Table -->
+      <div class="table-container" *ngIf="!loading">
+        <table mat-table [dataSource]="accounts" class="accounts-table">
+          
+          <!-- Account ID Column -->
+          <ng-container matColumnDef="accountId">
+            <th mat-header-cell *matHeaderCellDef>Account ID</th>
+            <td mat-cell *matCellDef="let account">
+              <div class="account-id-cell">
+                <mat-icon>account_circle</mat-icon>
+                <span>{{ account.accountId }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Holder Name Column -->
+          <ng-container matColumnDef="holderName">
+            <th mat-header-cell *matHeaderCellDef>Holder Name</th>
+            <td mat-cell *matCellDef="let account">{{ account.holderName }}</td>
+          </ng-container>
+
+          <!-- Balance Column -->
+          <ng-container matColumnDef="balance">
+            <th mat-header-cell *matHeaderCellDef>Balance</th>
+            <td mat-cell *matCellDef="let account">
+              <span class="balance-amount">{{ formatBalance(account.balance) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let account">
+              <mat-chip [class.active-status]="account.status === 'ACTIVE'"
+                        [class.locked-status]="account.status === 'LOCKED'"
+                        [class.closed-status]="account.status === 'CLOSED'">
+                {{ account.status }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let account">
+              <button mat-raised-button color="primary" (click)="viewAccountDetails(account.accountId)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && accounts.length === 0">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <h3>No Accounts Found</h3>
+        <p>No accounts have been created yet</p>
+      </div>
+    </mat-card>
+  </div>
+</div>
+
