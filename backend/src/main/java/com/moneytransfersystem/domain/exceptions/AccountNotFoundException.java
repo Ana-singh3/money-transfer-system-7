@@ -1,4 +1,3 @@
-// src/main/java/com/moneytransfersystem/domain/exceptions/AccountNotFoundException.java
 package com.moneytransfersystem.domain.exceptions;
 
 import com.moneytransfersystem.domain.exceptions.base.DomainException;

@@ -1,4 +1,3 @@
-// src/main/java/com/moneytransfersystem/domain/exceptions/InsufficentBalanceException.java
 package com.moneytransfersystem.domain.exceptions;
 
 import com.moneytransfersystem.domain.exceptions.base.DomainException;

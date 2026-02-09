@@ -1,24 +1,43 @@
-// src/main/java/com/moneytransfersystem/domain/entities/TransactionLog.java
 package com.moneytransfersystem.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moneytransfersystem.domain.enums.TransactionStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "transaction_logs")
+@Getter
+@Setter
+@NoArgsConstructor
 public class TransactionLog {
     @Id
     @Column(name = "transaction_id", length = 64)
     private String id;
+
+    @Column(name = "idempotency_key", unique = true, nullable = false)
+    private String idempotencyKey;
 
     @Column(name = "from_account_id")
     private String fromAccountId;
 
     @Column(name = "to_account_id")
     private String toAccountId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_account_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Account fromAccount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_account_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Account toAccount;
 
     @Column(name = "amount", precision = 19, scale = 4)
     private BigDecimal amount;
@@ -29,13 +48,8 @@ public class TransactionLog {
     @Column(name = "failure_reason")
     private String failureReason;
 
-    @Column(name = "idempotency_key")
-    private String idempotencyKey;
-
     @Column(name = "created_on")
     private Instant createdOn;
-
-    public TransactionLog() {}
 
     public TransactionLog(String fromAccountId, String toAccountId, BigDecimal amount, TransactionStatus status, String idempotencyKey) {
         this.id = UUID.randomUUID().toString();
@@ -46,22 +60,6 @@ public class TransactionLog {
         this.idempotencyKey = idempotencyKey;
         this.createdOn = Instant.now();
     }
-
-    public String getId() { return id; }
-    public String getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(String fromAccountId) { this.fromAccountId = fromAccountId; }
-    public String getToAccountId() { return toAccountId; }
-    public void setToAccountId(String toAccountId) { this.toAccountId = toAccountId; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public TransactionStatus getStatus() { return status; }
-    public void setStatus(TransactionStatus status) { this.status = status; }
-    public String getFailureReason() { return failureReason; }
-    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
-    public String getIdempotencyKey() { return idempotencyKey; }
-    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
-    public Instant getCreatedOn() { return createdOn; }
-    public void setCreatedOn(Instant createdOn) { this.createdOn = createdOn; }
 
     @Override
     public String toString() {

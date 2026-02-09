@@ -1,33 +1,29 @@
-// src/main/java/com/moneytransfersystem/domain/dtos/TransferRequest.java
 package com.moneytransfersystem.domain.dtos;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransferRequest {
-    @NotBlank
+    @NotNull
     private String fromAccountId;
 
-    @NotBlank
+    @NotNull
     private String toAccountId;
 
     @NotNull
     @DecimalMin(value = "0.01")
     private BigDecimal amount;
 
-    private String remarks;
+    @NotNull
     private String idempotencyKey;
-
-    public String getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(String fromAccountId) { this.fromAccountId = fromAccountId; }
-    public String getToAccountId() { return toAccountId; }
-    public void setToAccountId(String toAccountId) { this.toAccountId = toAccountId; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getRemarks() { return remarks; }
-    public void setRemarks(String remarks) { this.remarks = remarks; }
-    public String getIdempotencyKey() { return idempotencyKey; }
-    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 }

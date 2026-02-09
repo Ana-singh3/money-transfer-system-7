@@ -1,4 +1,3 @@
-// src/main/java/com/moneytransfersystem/domain/util/Money.java
 package com.moneytransfersystem.domain.util;
 
 import java.math.BigDecimal;

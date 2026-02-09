@@ -1,12 +1,19 @@
 package com.moneytransfersystem.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.moneytransfersystem.domain.enums.AccountStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
 @Table(name = "accounts")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Account {
     @Id
     @Column(name = "account_id", length = 64)
@@ -28,12 +35,15 @@ public class Account {
     @Column(name = "last_updated")
     private Instant lastUpdated;
 
-    public Account() {}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
 
     public Account(String id, String holderName, BigDecimal balance, AccountStatus status) {
         this.id = id;
         this.holderName = holderName;
-        this.balance = balance;
+        this.balance = balance.setScale(2, java.math.RoundingMode.HALF_UP);
         this.status = status;
         this.lastUpdated = Instant.now();
     }
@@ -42,10 +52,11 @@ public class Account {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Withdrawal amount must be positive");
         }
-        if (balance.compareTo(amount) < 0) {
+        BigDecimal normalizedAmount = amount.setScale(2, java.math.RoundingMode.HALF_UP);
+        if (balance.compareTo(normalizedAmount) < 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }
-        balance = balance.subtract(amount);
+        balance = balance.subtract(normalizedAmount).setScale(2, java.math.RoundingMode.HALF_UP);
         lastUpdated = Instant.now();
     }
 
@@ -53,24 +64,12 @@ public class Account {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be positive");
         }
-        balance = balance.add(amount);
+        BigDecimal normalizedAmount = amount.setScale(2, java.math.RoundingMode.HALF_UP);
+        balance = balance.add(normalizedAmount).setScale(2, java.math.RoundingMode.HALF_UP);
         lastUpdated = Instant.now();
     }
 
     public boolean isActive() { return status == AccountStatus.ACTIVE; }
-
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getHolderName() { return holderName; }
-    public void setHolderName(String holderName) { this.holderName = holderName; }
-    public BigDecimal getBalance() { return balance; }
-    public void setBalance(BigDecimal balance) { this.balance = balance; }
-    public AccountStatus getStatus() { return status; }
-    public void setStatus(AccountStatus status) { this.status = status; }
-    public Long getVersion() { return version; }
-    public Instant getLastUpdated() { return lastUpdated; }
-    public void setLastUpdated(Instant lastUpdated) { this.lastUpdated = lastUpdated; }
 
     @Override
     public String toString() {

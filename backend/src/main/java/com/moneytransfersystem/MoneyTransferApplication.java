@@ -1,4 +1,3 @@
-// src/main/java/com/moneytransfersystem/MoneyTransferApplication.java
 package com.moneytransfersystem;
 
 import org.springframework.boot.SpringApplication;
