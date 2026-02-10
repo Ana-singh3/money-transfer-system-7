@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,7 +17,8 @@ import { AuthService } from '../../services/auth.service';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    MatTooltipModule
   ],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']

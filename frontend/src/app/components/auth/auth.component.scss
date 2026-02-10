@@ -214,7 +214,12 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     position: relative;
     overflow: hidden;
+    color: #ffffff !important;
     transition: all 0.3s ease;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     
     &::before {
       content: '';
@@ -236,12 +241,84 @@
       box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
 
+    /* Align span content inline */
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      line-height: 1;
+    }
+
     mat-icon {
-      margin-right: 0.5rem;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     mat-spinner {
-      margin: 0 auto;
+      margin: 0;
+    }
+  }
+}
+
+.password-criteria {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+
+  .criteria-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.75rem;
+  }
+
+  .criteria-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+
+    li {
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+
+      .criterion-icon {
+        font-weight: 700;
+        min-width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      &.unmet {
+        color: #c33;
+
+        .criterion-icon {
+          color: #c33;
+        }
+      }
+
+      &.met {
+        color: #2e7d32;
+        background: rgba(46, 125, 50, 0.08);
+
+        .criterion-icon {
+          color: #2e7d32;
+        }
+      }
     }
   }
 }
@@ -257,5 +334,30 @@
       font-size: 1.5rem;
     }
   }
+}
+
+@media (max-width: 1024px) {
+  .auth-card {
+    max-width: 420px;
+    padding: 2rem;
+  }
+
+  .mode-switcher {
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-card {
+    margin: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .auth-header .logo { width: 64px; height: 64px; }
+  .auth-header h1 { font-size: 1.25rem; }
+  .auth-form .auth-button { height: 44px; }
+  .password-criteria .criteria-list { grid-template-columns: 1fr; }
 }
 

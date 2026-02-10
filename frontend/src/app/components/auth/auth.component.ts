@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,7 +13,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { AuthService } from '../../services/auth.service';
 import { AnimationsService } from '../../utils/animations.service';
 
-type AuthMode = 'signup' | 'login' | 'admin';
+type AuthMode = 'signup' | 'login';
 
 @Component({
   selector: 'app-auth',
@@ -39,13 +39,19 @@ export class AuthComponent implements OnInit, AfterViewInit {
   authMode: AuthMode = 'login';
   signupForm!: FormGroup;
   loginForm!: FormGroup;
-  adminForm!: FormGroup;
   
   loading = false;
   hidePassword = true;
   hideSignupPassword = true;
-  hideAdminPassword = true;
   returnUrl: string = '';
+
+  passwordCriteria = {
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false
+  };
 
   constructor(
     private formBuilder: FormBuilder,
@@ -69,16 +75,19 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
     this.signupForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(4)]],
+      password: ['', [Validators.required, Validators.minLength(6), this.passwordStrengthValidator.bind(this)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
 
-    this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(4)]]
-    });
+    // Subscribe to password changes to update criteria display
+    const passwordControl = this.signupForm.get('password');
+    if (passwordControl) {
+      passwordControl.valueChanges.subscribe((val: string) => {
+        this.updatePasswordCriteria(val || '');
+      });
+    }
 
-    this.adminForm = this.formBuilder.group({
+    this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(4)]]
     });
@@ -100,6 +109,25 @@ export class AuthComponent implements OnInit, AfterViewInit {
       return { passwordMismatch: true };
     }
     return null;
+  }
+
+  passwordStrengthValidator(control: AbstractControl) {
+    const val: string = control.value || '';
+    const missing: string[] = [];
+    if (val.length < 6) missing.push('minLength');
+    if (!/[A-Z]/.test(val)) missing.push('uppercase');
+    if (!/[a-z]/.test(val)) missing.push('lowercase');
+    if (!/[0-9]/.test(val)) missing.push('number');
+    if (!/[!@#$%^&*(),.?":{}|<>\[\]\-_/\\+=;~`]/.test(val)) missing.push('special');
+    return missing.length ? { passwordStrength: missing } : null;
+  }
+
+  updatePasswordCriteria(val: string) {
+    this.passwordCriteria.minLength = val.length >= 6;
+    this.passwordCriteria.uppercase = /[A-Z]/.test(val);
+    this.passwordCriteria.lowercase = /[a-z]/.test(val);
+    this.passwordCriteria.number = /[0-9]/.test(val);
+    this.passwordCriteria.special = /[!@#$%^&*(),.?":{}|<>\[\]\-_/\\+=;~`]/.test(val);
   }
 
   switchMode(mode: AuthMode): void {
@@ -150,7 +178,11 @@ export class AuthComponent implements OnInit, AfterViewInit {
           duration: 3000,
           panelClass: ['success-snackbar']
         });
-        this.router.navigate([this.returnUrl]);
+        if (response.role === 'ROLE_ADMIN') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate([this.returnUrl]);
+        }
       },
       error: (error) => {
         this.loading = false;
@@ -170,43 +202,10 @@ export class AuthComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onAdminLogin(): void {
-    if (this.adminForm.invalid) {
-      return;
-    }
-
-    this.loading = true;
-    const { username, password } = this.adminForm.value;
-
-    this.authService.login(username, password).subscribe({
-      next: (response) => {
-        this.loading = false;
-        if (response.role === 'ROLE_ADMIN') {
-          this.snackBar.open('Admin login successful!', 'Close', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.snackBar.open('This account is not an admin account', 'Close', {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
-        }
-      },
-      error: (error) => {
-        this.loading = false;
-        const errorMessage = error.error?.message || 'Invalid admin credentials';
-        this.snackBar.open(errorMessage, 'Close', {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
-      }
-    });
-  }
+  
 
   get signupF() { return this.signupForm.controls; }
   get loginF() { return this.loginForm.controls; }
-  get adminF() { return this.adminForm.controls; }
+  get passwordField() { return this.signupForm.get('password'); }
 }
 

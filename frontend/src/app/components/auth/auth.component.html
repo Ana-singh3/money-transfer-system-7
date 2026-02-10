@@ -28,12 +28,6 @@
         (click)="switchMode('login')">
         Login
       </button>
-      <button 
-        class="mode-btn" 
-        [class.active]="authMode === 'admin'"
-        (click)="switchMode('admin')">
-        Admin
-      </button>
     </div>
 
     <!-- Signup Form -->
@@ -76,9 +70,35 @@
             Password is required
           </mat-error>
           <mat-error *ngIf="signupF['password'].hasError('minlength')">
-            Password must be at least 4 characters
+            Password length should be at least 6 characters and a mix of uppercase, lowercase letters, numbers, and special characters.
           </mat-error>
         </mat-form-field>
+
+        <div class="password-criteria" *ngIf="passwordField?.value && authMode === 'signup'">
+          <div class="criteria-title">Password Requirements:</div>
+          <ul class="criteria-list">
+            <li [class.met]="passwordCriteria.minLength" [class.unmet]="!passwordCriteria.minLength">
+              <span class="criterion-icon">{{ passwordCriteria.minLength ? '✓' : '✗' }}</span>
+              At least 6 characters
+            </li>
+            <li [class.met]="passwordCriteria.uppercase" [class.unmet]="!passwordCriteria.uppercase">
+              <span class="criterion-icon">{{ passwordCriteria.uppercase ? '✓' : '✗' }}</span>
+              Uppercase letter (A-Z)
+            </li>
+            <li [class.met]="passwordCriteria.lowercase" [class.unmet]="!passwordCriteria.lowercase">
+              <span class="criterion-icon">{{ passwordCriteria.lowercase ? '✓' : '✗' }}</span>
+              Lowercase letter (a-z)
+            </li>
+            <li [class.met]="passwordCriteria.number" [class.unmet]="!passwordCriteria.number">
+              <span class="criterion-icon">{{ passwordCriteria.number ? '✓' : '✗' }}</span>
+              Number (0-9)
+            </li>
+            <li [class.met]="passwordCriteria.special" [class.unmet]="!passwordCriteria.special">
+              <span class="criterion-icon">{{ passwordCriteria.special ? '✓' : '✗' }}</span>
+              Special character (!#$%^&*)
+            </li>
+          </ul>
+        </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Confirm Password</mat-label>
@@ -159,58 +179,7 @@
       </form>
     </div>
 
-    <!-- Admin Login Form -->
-    <div *ngIf="authMode === 'admin'" class="auth-form-container">
-      <h2>Admin Access</h2>
-      <form [formGroup]="adminForm" (ngSubmit)="onAdminLogin()" class="auth-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Admin Username</mat-label>
-          <input 
-            matInput 
-            formControlName="username" 
-            placeholder="Enter admin username"
-            autocomplete="username">
-          <mat-icon matPrefix>admin_panel_settings</mat-icon>
-          <mat-error *ngIf="adminF['username'].hasError('required')">
-            Username is required
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input 
-            matInput 
-            [type]="hideAdminPassword ? 'password' : 'text'" 
-            formControlName="password"
-            placeholder="Enter admin password"
-            autocomplete="current-password">
-          <mat-icon matPrefix>lock</mat-icon>
-          <button 
-            mat-icon-button 
-            matSuffix 
-            type="button"
-            (click)="hideAdminPassword = !hideAdminPassword">
-            <mat-icon>{{hideAdminPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-          <mat-error *ngIf="adminF['password'].hasError('required')">
-            Password is required
-          </mat-error>
-        </mat-form-field>
-
-        <button 
-          mat-raised-button 
-          color="accent" 
-          type="submit" 
-          class="auth-button"
-          [disabled]="loading || adminForm.invalid">
-          <span *ngIf="!loading">
-            <mat-icon>admin_panel_settings</mat-icon>
-            Admin Login
-          </span>
-          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
-        </button>
-      </form>
-    </div>
+    <!-- Admin access is handled via regular login -->
   </mat-card>
 </div>
 

@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -44,6 +45,8 @@ export class HistoryComponent implements OnInit, AfterViewInit {
     private accountService: AccountService,
     private snackBar: MatSnackBar,
     private animationsService: AnimationsService
+    ,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -118,5 +121,9 @@ export class HistoryComponent implements OnInit, AfterViewInit {
       duration: 2000,
       panelClass: ['success-snackbar']
     });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/dashboard']);
   }
 }

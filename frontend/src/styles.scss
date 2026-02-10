@@ -161,3 +161,23 @@ body {
     display: none !important;
   }
 }
+
+/* Increase header sizes across the app */
+h1 {
+  font-size: 2.25rem !important; /* ~36px */
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 1.75rem !important; /* ~28px */
+}
+
+h3 {
+  font-size: 1.25rem !important; /* ~20px */
+}
+
+/* Navbar brand larger */
+.navbar .brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+}

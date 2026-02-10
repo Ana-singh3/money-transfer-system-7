@@ -123,29 +123,71 @@
       width: 100%;
     }
 
+      /* Nudge the rupee prefix slightly to the right for visual balance */
+      span[matPrefix] {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 12px; /* increased shift to the right */
+      }
+
     .form-actions {
       display: flex;
       gap: 1rem;
       margin-top: 1rem;
+      justify-content: flex-end;
 
+      /* Make both buttons consistent and aligned */
       button {
-        flex: 1;
-        height: 50px;
-        font-size: 1rem;
-        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        height: 46px;
+        padding: 0 14px;
+        box-sizing: border-box;
         border-radius: 10px;
+        align-self: center;
+      }
 
+      /* Cancel button styling */
+      button:first-child {
+        flex: 0 0 auto;
+        min-width: 110px;
+        font-size: 0.98rem;
+        background: transparent;
+        color: #374151;
+        border: 1px solid rgba(55,65,81,0.08);
+      }
+
+      /* Submit button styling */
+      button:last-child {
+        flex: 0 0 auto;
+        min-width: 160px;
+        font-size: 1rem;
+        font-weight: 700;
+
+        /* primary color background and white text */
         &[color="primary"] {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: #fff;
         }
 
-        mat-icon {
-          margin-right: 0.5rem;
+        /* ensure inner span containing icon+text centers properly */
+        > span {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          line-height: 1; /* keep text and icon baseline consistent */
         }
 
-        mat-spinner {
-          margin: 0 auto;
+        /* Force icon to vertically align with text baseline */
+        mat-icon { color: #fff; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-top: 0; }
+
+        /* Nudge icon slightly if needed for perfect alignment on some browsers */
+        > span mat-icon {
+          transform: translateY(1px);
         }
+        mat-spinner { margin: 0; }
       }
     }
   }
@@ -283,6 +325,15 @@
         }
       }
     }
+    .redirecting-message {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #374151;
+      background: rgba(102,126,234,0.06);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(102,126,234,0.12);
+    }
   }
 }
 
@@ -344,4 +395,19 @@
       }
     }
   }
+}
+
+@media (max-width: 420px) {
+  .transfer-form-card {
+    padding: 1rem;
+  }
+
+  form {
+    .form-actions {
+      flex-direction: column;
+      button { width: 100%; }
+    }
+  }
+
+  .success-message .success-details { padding: 1rem; }
 }

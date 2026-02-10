@@ -6,14 +6,31 @@ import { trigger, transition, style, animate, query } from '@angular/animations'
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: '<div [@routeAnimations]="getRouteAnimationData()"><router-outlet></router-outlet></div>',
-  styles: [`
-    div {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-  `],
+  template: `
+    <div class="app-root">
+      <div class="route-wrap" [@routeAnimations]="getRouteAnimationData()">
+        <router-outlet></router-outlet>
+      </div>
+      <footer class="app-footer">© {{ currentYear }} MoneyFlow. All rights reserved.</footer>
+    </div>
+  `,
+  styles: [
+    `
+      .app-root { display: flex; min-height: 100vh; flex-direction: column; }
+      .route-wrap { flex: 1 1 auto; }
+      .app-footer {
+        flex-shrink: 0;
+        text-align: center;
+        padding: 10px 12px;
+        font-size: 0.875rem;
+        color: #64748b;
+        background: transparent;
+      }
+      @media (max-width: 600px) {
+        .app-footer { font-size: 0.78rem; padding: 8px 10px; }
+      }
+    `
+  ],
   animations: [
     trigger('routeAnimations', [
       transition('* <=> *', [
@@ -34,6 +51,7 @@ import { trigger, transition, style, animate, query } from '@angular/animations'
 })
 export class AppComponent {
   title = 'money-transfer-app';
+  currentYear = new Date().getFullYear();
 
   getRouteAnimationData() {
     return 'route';

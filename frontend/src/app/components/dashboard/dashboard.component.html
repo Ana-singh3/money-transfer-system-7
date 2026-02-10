@@ -1,9 +1,12 @@
 <app-navbar></app-navbar>
 
 <div class="dashboard-container">
+   <!-- Header -->
   <div class="dashboard-header">
-    <h1>Welcome back, {{ holderName }}! 👋</h1>
-    <p>Manage your finances with ease</p>
+    <h1>Welcome back, {{ holderName }} 💰</h1>
+    <p class="subtitle">
+      Track, transfer, and manage your money securely and effortlessly!!
+    </p>
   </div>
 
   <div class="dashboard-content">
@@ -22,8 +25,11 @@
       <div class="balance-content" *ngIf="!loading; else loadingSpinner">
         <div class="balance-amount">
           <span class="currency">₹</span>
-          <span class="amount" #balanceAmount>{{ displayBalance | number:'1.2-2' }}</span>
+          <span class="amount balance-value" #balanceAmount>
+            {{ displayBalance | number:'1.2-2' }}
+          </span>
         </div>
+
         <p class="account-id">Account ID: {{ accountId }}</p>
       </div>
 
@@ -65,25 +71,57 @@
       </div>
     </div>
 
-    <!-- Info Cards -->
-    <div class="info-section">
-      <mat-card class="info-card">
-        <mat-icon class="info-icon">security</mat-icon>
-        <h3>Secure Transactions</h3>
-        <p>All transfers are encrypted and protected</p>
-      </mat-card>
-
-      <mat-card class="info-card">
-        <mat-icon class="info-icon">flash_on</mat-icon>
-        <h3>Instant Transfer</h3>
-        <p>Money reaches instantly</p>
-      </mat-card>
-
-      <mat-card class="info-card">
-        <mat-icon class="info-icon">verified_user</mat-icon>
-        <h3>100% Safe</h3>
-        <p>Bank-grade security standards</p>
-      </mat-card>
+<!-- Platform Features -->
+<div class="features-section">
+  <div class="features-hero">
+    <div>
+      <h2 class="features-title">Why MoneyFlow?</h2>
+      <p class="features-subtitle">
+        Everything you need to manage your money — fast, secure, and reliable
+      </p>
     </div>
+    <button mat-stroked-button color="primary">Explore features</button>
+  </div>
+
+  <div class="features-grid">
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle blue">
+          <mat-icon>shield_lock</mat-icon>
+        </div>
+      </div>
+      <h3>Secure Transactions</h3>
+      <p>
+        All your transfers are protected with end-to-end encryption and
+        bank-grade security.
+      </p>
+      <a class="feature-cta" (click)="navigateToHistory()">Learn more</a>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle green">
+          <mat-icon>bolt</mat-icon>
+        </div>
+      </div>
+      <h3>Instant Money Transfer</h3>
+      <p>
+        Send money instantly without delays — anytime, anywhere.
+      </p>
+      <a class="feature-cta" (click)="navigateToTransfer()">Start sending</a>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle purple">
+          <mat-icon>dashboard_customize</mat-icon>
+        </div>
+      </div>
+      <h3>Smart Dashboard</h3>
+      <p>
+        Track balance, transfers, and transaction history from one place.
+      </p>
+      <a class="feature-cta" (click)="navigateToHistory()">View dashboard</a>
+    </mat-card>
   </div>
 </div>

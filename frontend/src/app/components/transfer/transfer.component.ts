@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -37,7 +37,7 @@ import { AnimationsService } from '../../utils/animations.service';
   templateUrl: './transfer.component.html',
   styleUrls: ['./transfer.component.scss']
 })
-export class TransferComponent implements OnInit, AfterViewInit {
+export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('successMessage', { static: false }) successMessage!: ElementRef;
   @ViewChild('transferFormCard', { static: false }) transferFormCard!: ElementRef;
   
@@ -49,6 +49,9 @@ export class TransferComponent implements OnInit, AfterViewInit {
   loadingBalance = true;
   transferSuccess = false;
   transferResult: TransferResponse | null = null;
+  redirecting = false;
+  redirectCountdown = 10;
+  private redirectTimer: any = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -69,7 +72,8 @@ export class TransferComponent implements OnInit, AfterViewInit {
     }
 
     this.transferForm = this.formBuilder.group({
-      toAccountId: ['', [Validators.required, Validators.pattern('^[A-Z0-9-]+$')]],
+      // Must start with 'ACC-' and have 16 alphanumeric (uppercase/digits) characters after prefix
+      toAccountId: ['', [Validators.required, Validators.pattern('^ACC-[A-Z0-9]{16}$')]],
       amount: ['', [Validators.required, Validators.min(0.01), Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]]
     });
   }
@@ -155,16 +159,15 @@ export class TransferComponent implements OnInit, AfterViewInit {
           }
         }, 100);
         
-        this.snackBar.open('Transfer successful! 🎉', 'Close', {
+        this.snackBar.open('Transfer successful! ', 'Close', {
           duration: 5000,
           panelClass: ['success-snackbar']
         });
 
         this.loadBalance();
 
-        setTimeout(() => {
-          this.resetForm();
-        }, 10000);
+        // start redirect countdown and show message
+        this.startRedirectCountdown(10);
       },
       error: (error) => {
         this.loading = false;
@@ -183,6 +186,32 @@ export class TransferComponent implements OnInit, AfterViewInit {
     this.transferForm.reset();
     this.transferSuccess = false;
     this.transferResult = null;
+  }
+
+  startRedirectCountdown(seconds: number) {
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+    }
+    this.redirecting = true;
+    this.redirectCountdown = seconds;
+    this.redirectTimer = setInterval(() => {
+      this.redirectCountdown -= 1;
+      if (this.redirectCountdown <= 0) {
+        clearInterval(this.redirectTimer);
+        this.redirectTimer = null;
+        this.redirecting = false;
+        // navigate back to transfer page (refresh) and reset form
+        this.resetForm();
+        this.router.navigate(['/transfer']);
+      }
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+      this.redirectTimer = null;
+    }
   }
 
   cancel(): void {

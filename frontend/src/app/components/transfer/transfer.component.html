@@ -52,7 +52,7 @@
             Account ID is required
           </mat-error>
           <mat-error *ngIf="f['toAccountId'].hasError('pattern')">
-            Please enter a valid account ID
+            Account Id should start with "ACC-" and has 16 characters.
           </mat-error>
         </mat-form-field>
 
@@ -63,7 +63,7 @@
             formControlName="amount" 
             placeholder="0.00"
             type="number"
-            step="0.01">
+            step="1.00">
           <span matPrefix>₹&nbsp;</span>
           <mat-icon matSuffix matTooltip="Enter amount to transfer">info</mat-icon>
           <mat-error *ngIf="f['amount'].hasError('required')">
@@ -75,7 +75,7 @@
           <mat-error *ngIf="f['amount'].hasError('pattern')">
             Please enter a valid amount (up to 2 decimal places)
           </mat-error>
-          <mat-hint>Maximum: ₹{{ currentBalance | number:'1.2-2' }}</mat-hint>
+          
         </mat-form-field>
 
         <div class="form-actions">
@@ -137,6 +137,9 @@
             <mat-icon>dashboard</mat-icon>
             Go to Dashboard
           </button>
+        </div>
+        <div class="redirecting-message" *ngIf="redirecting">
+          Redirecting to the transfer page in {{ redirectCountdown }} second{{ redirectCountdown !== 1 ? 's' : '' }}...
         </div>
       </div>
     </mat-card>
