@@ -76,10 +76,10 @@ public class AuthServiceImpl implements AuthService {
 
         String accountId = IdGenerator.generateAccountId();
         Account newAccount = new Account(
-                accountId,
-                savedUser.getUsername(),
-                BigDecimal.ZERO,
-                AccountStatus.ACTIVE
+            accountId,
+            savedUser.getUsername(),
+            BigDecimal.valueOf(500),
+            AccountStatus.ACTIVE
         );
         newAccount.setUser(savedUser);
         accountRepository.save(newAccount);

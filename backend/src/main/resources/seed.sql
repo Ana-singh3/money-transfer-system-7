@@ -10,14 +10,14 @@ WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user');
 
 -- Insert Accounts (linked to users)
 INSERT INTO accounts (account_id, holder_name, balance, status, version, last_updated, user_id) 
-SELECT 'ACC-001', 'John Doe', 10000.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
+SELECT 'ACC-001', 'Jiya Paliwal', 500.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
 WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_id = 'ACC-001');
 
 INSERT INTO accounts (account_id, holder_name, balance, status, version, last_updated, user_id) 
-SELECT 'ACC-002', 'Jane Smith', 5000.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
+SELECT 'ACC-002', 'Nishita Jain', 500.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
 WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_id = 'ACC-002');
 
 INSERT INTO accounts (account_id, holder_name, balance, status, version, last_updated, user_id) 
-SELECT 'ACC-003', 'Bob Johnson', 7500.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
+SELECT 'ACC-003', 'Yash', 500.0000, 'ACTIVE', 0, CURRENT_TIMESTAMP, (SELECT id FROM users WHERE username = 'user' LIMIT 1)
 WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE account_id = 'ACC-003');
 

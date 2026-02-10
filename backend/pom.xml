@@ -55,13 +55,15 @@
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- PostgreSQL driver -->
+    <!-- MySQL Connector for production DB -->
+<!-- Source: https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
     <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.33</version>
+        <scope>compile</scope>
     </dependency>
+
 
     <!-- Spring Security -->
     <dependency>

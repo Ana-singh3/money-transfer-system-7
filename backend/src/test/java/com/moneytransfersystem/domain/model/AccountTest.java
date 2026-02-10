@@ -15,7 +15,7 @@ class AccountTest {
 
     @BeforeEach
     void setUp() {
-        account = new Account("ACC-001", "John Doe", new BigDecimal("1000.00"), AccountStatus.ACTIVE);
+        account = new Account("ACC-001", "Jiya Paliwal", new BigDecimal("1000.00"), AccountStatus.ACTIVE);
     }
 
     @Test

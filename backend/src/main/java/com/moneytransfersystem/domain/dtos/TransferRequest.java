@@ -21,7 +21,7 @@ public class TransferRequest {
     private String toAccountId;
 
     @NotNull
-    @DecimalMin(value = "0.01")
+    @DecimalMin(value = "1.00", message = "Transfer amount must be at least 1.00")
     private BigDecimal amount;
 
     @NotNull

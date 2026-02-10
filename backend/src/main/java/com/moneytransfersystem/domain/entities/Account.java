@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "accounts")
@@ -15,6 +15,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 public class Account {
+
     @Id
     @Column(name = "account_id", length = 64)
     private String id;
@@ -33,7 +34,7 @@ public class Account {
     private Long version;
 
     @Column(name = "last_updated")
-    private Instant lastUpdated;
+    private LocalDateTime lastUpdated;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -45,7 +46,7 @@ public class Account {
         this.holderName = holderName;
         this.balance = balance.setScale(2, java.math.RoundingMode.HALF_UP);
         this.status = status;
-        this.lastUpdated = Instant.now();
+        this.lastUpdated = LocalDateTime.now();
     }
 
     public void debit(BigDecimal amount) {
@@ -57,7 +58,7 @@ public class Account {
             throw new IllegalArgumentException("Insufficient balance");
         }
         balance = balance.subtract(normalizedAmount).setScale(2, java.math.RoundingMode.HALF_UP);
-        lastUpdated = Instant.now();
+        lastUpdated = LocalDateTime.now();
     }
 
     public void credit(BigDecimal amount) {
@@ -66,10 +67,12 @@ public class Account {
         }
         BigDecimal normalizedAmount = amount.setScale(2, java.math.RoundingMode.HALF_UP);
         balance = balance.add(normalizedAmount).setScale(2, java.math.RoundingMode.HALF_UP);
-        lastUpdated = Instant.now();
+        lastUpdated = LocalDateTime.now();
     }
 
-    public boolean isActive() { return status == AccountStatus.ACTIVE; }
+    public boolean isActive() {
+        return status == AccountStatus.ACTIVE;
+    }
 
     @Override
     public String toString() {
