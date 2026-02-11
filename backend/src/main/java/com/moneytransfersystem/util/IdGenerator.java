@@ -2,7 +2,12 @@ package com.moneytransfersystem.util;
 
 import java.util.UUID;
 
-public class IdGenerator {
+public final class IdGenerator {
+
+    private IdGenerator() {
+        // Utility class
+    }
+
     public static String generateAccountId() {
         return "ACC-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
     }

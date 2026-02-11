@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
                 accountId = accounts.get(0).getId();
             }
         } catch (Exception e) {
+            // Intentionally ignored: if account resolution fails, login should still succeed and return a token.
         }
 
         return new LoginResponse(token, user.getUsername(), user.getRole().name(), accountId);
@@ -76,10 +77,10 @@ public class AuthServiceImpl implements AuthService {
 
         String accountId = IdGenerator.generateAccountId();
         Account newAccount = new Account(
-            accountId,
-            savedUser.getUsername(),
-            BigDecimal.valueOf(500),
-            AccountStatus.ACTIVE
+                accountId,
+                savedUser.getUsername(),
+                BigDecimal.ZERO,
+                AccountStatus.ACTIVE
         );
         newAccount.setUser(savedUser);
         accountRepository.save(newAccount);

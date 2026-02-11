@@ -5,7 +5,6 @@ import com.moneytransfersystem.domain.dtos.TransferResponse;
 import com.moneytransfersystem.domain.entities.Account;
 import com.moneytransfersystem.domain.entities.TransactionLog;
 import com.moneytransfersystem.domain.entities.User;
-import com.moneytransfersystem.domain.enums.AccountStatus;
 import com.moneytransfersystem.domain.enums.TransactionStatus;
 import com.moneytransfersystem.domain.exceptions.AccountNotActiveException;
 import com.moneytransfersystem.domain.exceptions.AccountNotFoundException;
@@ -63,7 +62,7 @@ public class TransferServiceImpl implements TransferService {
         }
 
         BigDecimal transferAmount = request.getAmount().setScale(2, java.math.RoundingMode.HALF_UP);
-        
+
         if (fromAccount.getBalance().compareTo(transferAmount) < 0) {
             throw new InsufficentBalanceException(
                     request.getFromAccountId(),
@@ -73,7 +72,6 @@ public class TransferServiceImpl implements TransferService {
         }
 
         String transactionId = IdGenerator.generateTransactionId();
-        TransactionLog transactionLog = null;
 
         try {
             fromAccount.debit(transferAmount);
@@ -82,7 +80,7 @@ public class TransferServiceImpl implements TransferService {
             accountRepository.save(fromAccount);
             accountRepository.save(toAccount);
 
-            transactionLog = new TransactionLog(
+            TransactionLog transactionLog = new TransactionLog(
                     request.getFromAccountId(),
                     request.getToAccountId(),
                     transferAmount,
@@ -100,7 +98,7 @@ public class TransferServiceImpl implements TransferService {
             );
 
         } catch (Exception e) {
-            transactionLog = new TransactionLog(
+            TransactionLog transactionLog = new TransactionLog(
                     request.getFromAccountId(),
                     request.getToAccountId(),
                     transferAmount,

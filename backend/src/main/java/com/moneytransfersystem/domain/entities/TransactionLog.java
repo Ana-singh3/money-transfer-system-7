@@ -6,9 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -17,7 +16,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class TransactionLog {
-
     @Id
     @Column(name = "transaction_id", length = 64)
     private String id;
@@ -51,18 +49,16 @@ public class TransactionLog {
     private String failureReason;
 
     @Column(name = "created_on")
-    private LocalDateTime createdOn;
+    private Instant createdOn;
 
-    public TransactionLog(String fromAccountId, String toAccountId, BigDecimal amount,
-                          TransactionStatus status, String idempotencyKey) {
-
+    public TransactionLog(String fromAccountId, String toAccountId, BigDecimal amount, TransactionStatus status, String idempotencyKey) {
         this.id = UUID.randomUUID().toString();
         this.fromAccountId = fromAccountId;
         this.toAccountId = toAccountId;
         this.amount = amount;
         this.status = status;
         this.idempotencyKey = idempotencyKey;
-        this.createdOn = LocalDateTime.now();
+        this.createdOn = Instant.now();
     }
 
     @Override
