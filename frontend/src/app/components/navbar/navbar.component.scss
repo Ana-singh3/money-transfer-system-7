@@ -7,6 +7,7 @@
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-family: 'Inter', sans-serif;
+  width: 100%;
 }
 
 .navbar-container {
@@ -18,6 +19,7 @@
   align-items: center;
   padding: 0 2rem;
   height: 64px;
+  box-sizing: border-box;
 }
 
 .navbar-brand {
@@ -25,17 +27,20 @@
   align-items: center;
   gap: 0.75rem;
   cursor: pointer;
-  
+  flex-shrink: 0;
+
   .brand-icon {
     font-size: 28px;
     width: 28px;
     height: 28px;
+    flex-shrink: 0;
   }
-  
+
   .brand-text {
     font-size: 1.9rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+    white-space: nowrap;
   }
 }
 
@@ -43,6 +48,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 1;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  // Hide scrollbar
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 
   button {
     display: flex;
@@ -52,13 +67,16 @@
     font-size: 1.15rem;
     font-weight: 500;
     transition: all 0.2s ease;
-    
+    white-space: nowrap;
+    flex-shrink: 0;
+
     mat-icon {
       font-size: 20px;
       width: 20px;
       height: 20px;
+      flex-shrink: 0;
     }
-    
+
     span {
       line-height: 1;
     }
@@ -74,12 +92,14 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  flex-shrink: 0;
 
   .user-name {
     font-size: 1.05rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.95);
     letter-spacing: -0.3px;
+    white-space: nowrap;
   }
 
   .logout-button {
@@ -98,6 +118,7 @@
     transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3);
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 
     &::before {
       content: '';
@@ -128,6 +149,7 @@
       width: 20px;
       height: 20px;
       color: white;
+      flex-shrink: 0;
     }
 
     span {
@@ -136,44 +158,169 @@
   }
 }
 
-// Mobile responsive
-@media (max-width: 768px) {
+// Tablet and below
+@media (max-width: 1024px) {
   .navbar-container {
-    padding: 0 1rem;
+    padding: 0 1.5rem;
   }
-  
+
   .navbar-brand .brand-text {
-    font-size: 1.25rem;
+    font-size: 1.6rem;
   }
-  
-  .navbar-menu button span,
-  .navbar-user button span {
-    display: none;
+
+  .navbar-menu button {
+    font-size: 1rem;
+    padding: 0.5rem 0.875rem;
   }
-  
-  .navbar-menu button,
-  .navbar-user .user-button {
-    padding: 0.5rem;
-    min-width: 40px;
+
+  .navbar-user {
+    gap: 1rem;
+
+    .user-name {
+      font-size: 0.95rem;
+    }
+
+    .logout-button {
+      padding: 0.55rem 1rem;
+      font-size: 0.95rem;
+    }
   }
 }
 
-@media (max-width: 480px) {
+// Mobile landscape and small tablets
+@media (max-width: 768px) {
   .navbar-container {
-    padding: 0 0.75rem;
+    padding: 0 1rem;
+    height: 56px;
   }
-  
+
   .navbar-brand {
     gap: 0.5rem;
-    
+
     .brand-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
     }
-    
+
+    .brand-text {
+      font-size: 1.35rem;
+    }
+  }
+
+  .navbar-menu {
+    gap: 0.25rem;
+
+    button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+
+      span {
+        display: none;
+      }
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+  }
+
+  .navbar-user {
+    gap: 0.75rem;
+
+    .user-name {
+      display: none;
+    }
+
+    .logout-button {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.9rem;
+      gap: 0.375rem;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Small mobile devices
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0 0.75rem;
+    height: 52px;
+  }
+
+  .navbar-brand {
+    gap: 0.375rem;
+
+    .brand-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
     .brand-text {
       font-size: 1.125rem;
     }
+  }
+
+  .navbar-menu {
+    gap: 0.125rem;
+
+    button {
+      padding: 0.375rem 0.5rem;
+      min-width: 36px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  .navbar-user {
+    gap: 0.5rem;
+
+    .logout-button {
+      padding: 0.425rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 20px;
+
+      span {
+        display: none;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Extra small devices
+@media (max-width: 360px) {
+  .navbar-container {
+    padding: 0 0.5rem;
+  }
+
+  .navbar-brand .brand-text {
+    font-size: 1rem;
+  }
+
+  .navbar-menu button {
+    padding: 0.325rem 0.425rem;
+    min-width: 32px;
+  }
+
+  .navbar-user .logout-button {
+    padding: 0.375rem 0.625rem;
   }
 }

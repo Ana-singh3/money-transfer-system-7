@@ -86,7 +86,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
+  ///admin/account/:id
   viewAccountDetails(accountId: string): void {
     this.router.navigate(['/admin/account', accountId]);
   }

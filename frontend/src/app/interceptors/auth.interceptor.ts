@@ -11,7 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.url.includes('/auth/login') || req.url.includes('/auth/signup')) {
     return next(req);
   }
-
+  // For every HTTP request (except /auth/login and /auth/signup), add the Authorization header with the JWT token if it exists
   const token = authService.getToken();
   
   if (token) {

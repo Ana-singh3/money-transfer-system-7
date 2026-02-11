@@ -27,7 +27,7 @@ export class AccountService {
         }))
       );
   }
-
+  //GET /accounts/all
   getAllAccounts(): Observable<AccountResponse[]> {
     return this.http.get<AccountResponse[]>(`${this.apiUrl}/accounts/all`);
   }
