@@ -1,7 +1,7 @@
 package com.moneytransfersystem.controller;
 
 import com.moneytransfersystem.domain.dtos.AccountResponse;
-import com.moneytransfersystem.domain.entities.TransactionLog;
+import com.moneytransfersystem.domain.dtos.TransactionResponseDTO;
 import com.moneytransfersystem.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,8 +60,8 @@ public class AccountController {
             @ApiResponse(responseCode = "403", description = "Unauthorized access to account"),
             @ApiResponse(responseCode = "404", description = "Account not found")
     })
-    public ResponseEntity<List<TransactionLog>> getAccountTransactions(@PathVariable String id) {
-        List<TransactionLog> transactions = accountService.getAccountTransactions(id);
+    public ResponseEntity<List<TransactionResponseDTO>> getAccountTransactions(@PathVariable String id) {
+        List<TransactionResponseDTO> transactions = accountService.getAccountTransactions(id);
         return ResponseEntity.ok(transactions);
     }
 

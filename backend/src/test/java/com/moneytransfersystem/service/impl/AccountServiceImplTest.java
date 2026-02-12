@@ -1,6 +1,7 @@
 package com.moneytransfersystem.service.impl;
 
 import com.moneytransfersystem.domain.dtos.AccountResponse;
+import com.moneytransfersystem.domain.dtos.TransactionResponseDTO;
 import com.moneytransfersystem.domain.entities.Account;
 import com.moneytransfersystem.domain.entities.TransactionLog;
 import com.moneytransfersystem.domain.entities.User;
@@ -11,6 +12,7 @@ import com.moneytransfersystem.domain.exceptions.AccountNotFoundException;
 import com.moneytransfersystem.domain.exceptions.UnauthorizedAccessException;
 import com.moneytransfersystem.repository.AccountRepository;
 import com.moneytransfersystem.repository.TransactionLogRepository;
+import com.moneytransfersystem.service.ErrorLogService;
 import com.moneytransfersystem.service.UserService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +35,7 @@ class AccountServiceImplTest {
     @Mock private AccountRepository accountRepository;
     @Mock private TransactionLogRepository transactionLogRepository;
     @Mock private UserService userService;
+    @Mock private ErrorLogService errorLogService;
     @InjectMocks private AccountServiceImpl accountService;
 
     private User owner;
@@ -185,8 +189,9 @@ class AccountServiceImplTest {
                 when(userService.isAdmin(owner)).thenReturn(false);
                 when(transactionLogRepository.findByFromAccountIdOrToAccountIdOrderByCreatedOnDesc("ACC-001", "ACC-001"))
                         .thenReturn(List.of(log));
+                when(errorLogService.getFailedTransactions("ACC-001")).thenReturn(Collections.emptyList());
 
-                List<TransactionLog> result = accountService.getAccountTransactions("ACC-001");
+                List<TransactionResponseDTO> result = accountService.getAccountTransactions("ACC-001");
                 assertThat(result).hasSize(1);
                 assertThat(result.get(0).getFromAccountId()).isEqualTo("ACC-001");
             }
