@@ -97,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
         Account newAccount = new Account(
                 accountId,
                 savedUser.getUsername(),
-                BigDecimal.ZERO,
+                BigDecimal.valueOf(500.00),
                 AccountStatus.ACTIVE
         );
         newAccount.setUser(savedUser);
