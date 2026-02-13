@@ -1,0 +1,185 @@
+<div class="auth-container">
+  <div class="auth-background" #backgroundShapes>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <mat-card class="auth-card" #authCard>
+    <div class="auth-header">
+      <div class="logo">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <h1>MoneyFlow</h1>
+      <p>Secure Money Transfer System</p>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-switcher">
+      <button 
+        class="mode-btn" 
+        [class.active]="authMode === 'signup'"
+        (click)="switchMode('signup')">
+        Sign Up
+      </button>
+      <button 
+        class="mode-btn" 
+        [class.active]="authMode === 'login'"
+        (click)="switchMode('login')">
+        Login
+      </button>
+    </div>
+
+    <!-- Signup Form -->
+    <div *ngIf="authMode === 'signup'" class="auth-form-container">
+      <h2>Create Account</h2>
+      <form [formGroup]="signupForm" (ngSubmit)="onSignup()" class="auth-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            formControlName="username" 
+            placeholder="Choose a username"
+            autocomplete="username">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="signupF['username'].hasError('required')">
+            Username is required
+          </mat-error>
+          <mat-error *ngIf="signupF['username'].hasError('minlength')">
+            Username must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="hideSignupPassword ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Create a password"
+            autocomplete="new-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hideSignupPassword = !hideSignupPassword">
+            <mat-icon>{{hideSignupPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="signupF['password'].hasError('required')">
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="signupF['password'].hasError('minlength')">
+            Password length should be at least 6 characters and a mix of uppercase, lowercase letters, numbers, and special characters.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="password-criteria" *ngIf="passwordField?.value && authMode === 'signup'">
+          <div class="criteria-title">Password Requirements:</div>
+          <ul class="criteria-list">
+            <li [class.met]="passwordCriteria.minLength" [class.unmet]="!passwordCriteria.minLength">
+              <span class="criterion-icon">{{ passwordCriteria.minLength ? '✓' : '✗' }}</span>
+              At least 6 characters
+            </li>
+            <li [class.met]="passwordCriteria.uppercase" [class.unmet]="!passwordCriteria.uppercase">
+              <span class="criterion-icon">{{ passwordCriteria.uppercase ? '✓' : '✗' }}</span>
+              Uppercase letter (A-Z)
+            </li>
+            <li [class.met]="passwordCriteria.lowercase" [class.unmet]="!passwordCriteria.lowercase">
+              <span class="criterion-icon">{{ passwordCriteria.lowercase ? '✓' : '✗' }}</span>
+              Lowercase letter (a-z)
+            </li>
+            <li [class.met]="passwordCriteria.number" [class.unmet]="!passwordCriteria.number">
+              <span class="criterion-icon">{{ passwordCriteria.number ? '✓' : '✗' }}</span>
+              Number (0-9)
+            </li>
+            <li [class.met]="passwordCriteria.special" [class.unmet]="!passwordCriteria.special">
+              <span class="criterion-icon">{{ passwordCriteria.special ? '✓' : '✗' }}</span>
+              Special character (!#$%^&*)
+            </li>
+          </ul>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input 
+            matInput 
+            [type]="hideSignupPassword ? 'password' : 'text'" 
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+            autocomplete="new-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error *ngIf="signupF['confirmPassword'].hasError('required')">
+            Please confirm your password
+          </mat-error>
+          <mat-error *ngIf="signupForm.hasError('passwordMismatch')">
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="auth-button"
+          [disabled]="loading || signupForm.invalid">
+          <span *ngIf="!loading">Create Account</span>
+          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </div>
+
+    <!-- Login Form -->
+    <div *ngIf="authMode === 'login'" class="auth-form-container">
+      <h2>Welcome Back</h2>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            formControlName="username" 
+            placeholder="Enter your username"
+            autocomplete="username">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="loginF['username'].hasError('required')">
+            Username is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="hidePassword ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hidePassword = !hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginF['password'].hasError('required')">
+            Password is required
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="auth-button"
+          [disabled]="loading || loginForm.invalid">
+          <span *ngIf="!loading">Sign In</span>
+          <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </div>
+
+    <!-- Admin access is handled via regular login -->
+  </mat-card>
+</div>
+

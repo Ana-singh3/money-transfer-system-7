@@ -1,0 +1,39 @@
+<mat-toolbar color="primary" class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <mat-icon class="brand-icon">account_balance</mat-icon>
+      <span class="brand-text">MoneyFlow</span>
+    </div>
+
+    <div class="navbar-menu">
+      <ng-container *ngIf="!isAdmin">
+        <button mat-button routerLink="/dashboard" routerLinkActive="active-link">
+          <mat-icon>dashboard</mat-icon>
+          <span>Dashboard</span>
+        </button>
+        <button mat-button routerLink="/transfer" routerLinkActive="active-link">
+          <mat-icon>send</mat-icon>
+          <span>Transfer</span>
+        </button>
+        <button mat-button routerLink="/history" routerLinkActive="active-link">
+          <mat-icon>history</mat-icon>
+          <span>History</span>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="isAdmin">
+        <button mat-button routerLink="/admin/dashboard" routerLinkActive="active-link">
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span>Admin Dashboard</span>
+        </button>
+      </ng-container>
+    </div>
+
+    <div class="navbar-user">
+      <span class="user-name">{{ holderName }}</span>
+      <button mat-button class="logout-button" (click)="logout()" matTooltip="Sign out">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>

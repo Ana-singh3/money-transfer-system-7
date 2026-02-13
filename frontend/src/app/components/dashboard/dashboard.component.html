@@ -1,0 +1,127 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-container">
+   <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Welcome back, {{ holderName }} 💰</h1>
+    <p class="subtitle">
+      Track, transfer, and manage your money securely and effortlessly!!
+    </p>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Balance Card -->
+    <mat-card class="balance-card" #balanceCard>
+      <div class="card-header">
+        <h2>
+          <mat-icon>account_balance_wallet</mat-icon>
+          Current Balance
+        </h2>
+        <button mat-icon-button (click)="refreshBalance()" matTooltip="Refresh balance">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      
+      <div class="balance-content" *ngIf="!loading; else loadingSpinner">
+        <div class="balance-amount">
+          <span class="currency">₹</span>
+          <span class="amount balance-value" #balanceAmount>
+            {{ displayBalance | number:'1.2-2' }}
+          </span>
+        </div>
+
+        <p class="account-id">Account ID: {{ accountId }}</p>
+      </div>
+
+      <ng-template #loadingSpinner>
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </ng-template>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      
+      <div class="action-cards" #actionCards>
+        <mat-card class="action-card" (click)="navigateToTransfer()">
+          <div class="action-icon transfer">
+            <mat-icon>send</mat-icon>
+          </div>
+          <h3>Send Money</h3>
+          <p>Transfer funds to another account</p>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="navigateToHistory()">
+          <div class="action-icon history">
+            <mat-icon>history</mat-icon>
+          </div>
+          <h3>Transaction History</h3>
+          <p>View all your transactions</p>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="refreshBalance()">
+          <div class="action-icon refresh">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+          <h3>Check Balance</h3>
+          <p>Refresh your current balance</p>
+        </mat-card>
+      </div>
+    </div>
+
+<!-- Platform Features -->
+<div class="features-section">
+  <div class="features-hero">
+    <div>
+      <h2 class="features-title">Why MoneyFlow?</h2>
+      <p class="features-subtitle">
+        Everything you need to manage your money — fast, secure, and reliable
+      </p>
+    </div>
+    <button mat-stroked-button color="primary">Explore features</button>
+  </div>
+
+  <div class="features-grid">
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle blue">
+          <mat-icon>shield_lock</mat-icon>
+        </div>
+      </div>
+      <h3>Secure Transactions</h3>
+      <p>
+        All your transfers are protected with end-to-end encryption and
+        bank-grade security.
+      </p>
+      <a class="feature-cta" (click)="navigateToHistory()">Learn more</a>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle green">
+          <mat-icon>bolt</mat-icon>
+        </div>
+      </div>
+      <h3>Instant Money Transfer</h3>
+      <p>
+        Send money instantly without delays — anytime, anywhere.
+      </p>
+      <a class="feature-cta" (click)="navigateToTransfer()">Start sending</a>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <div class="feature-top">
+        <div class="feature-icon-circle purple">
+          <mat-icon>dashboard_customize</mat-icon>
+        </div>
+      </div>
+      <h3>Smart Dashboard</h3>
+      <p>
+        Track balance, transfers, and transaction history from one place.
+      </p>
+      <a class="feature-cta" (click)="navigateToHistory()">View dashboard</a>
+    </mat-card>
+  </div>
+</div>
