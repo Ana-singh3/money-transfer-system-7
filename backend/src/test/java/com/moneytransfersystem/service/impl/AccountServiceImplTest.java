@@ -195,6 +195,35 @@ class AccountServiceImplTest {
                 assertThat(result).hasSize(1);
                 assertThat(result.get(0).getFromAccountId()).isEqualTo("ACC-001");
             }
+
+            @Test
+            @DisplayName("merges failed transactions from logs, skipping duplicates, then sorts by createdOn desc")
+            void mergesFailuresAndSorts() {
+                TransactionLog db = new TransactionLog("ACC-001", "ACC-002",
+                        new BigDecimal("50.00"), TransactionStatus.SUCCESS, "KEY-1");
+                db.setId("TXN-DB");
+                db.setCreatedOn(java.time.Instant.parse("2026-02-12T10:11:10.000Z"));
+
+                TransactionResponseDTO duplicate = new TransactionResponseDTO(
+                        "TXN-DB", "ACC-001", "ACC-002", new BigDecimal("50.00"),
+                        "FAILED", "dup", java.time.Instant.parse("2026-02-12T10:11:12.000Z"));
+                TransactionResponseDTO newFailure = new TransactionResponseDTO(
+                        "TXN-LOG", "ACC-001", "ACC-999", new BigDecimal("10.00"),
+                        "FAILED", "boom", java.time.Instant.parse("2026-02-12T10:11:13.000Z"));
+
+                when(accountRepository.findByIdWithUser("ACC-001")).thenReturn(Optional.of(account));
+                when(userService.getCurrentUser()).thenReturn(owner);
+                when(userService.isAdmin(owner)).thenReturn(false);
+                when(transactionLogRepository.findByFromAccountIdOrToAccountIdOrderByCreatedOnDesc("ACC-001", "ACC-001"))
+                        .thenReturn(List.of(db));
+                when(errorLogService.getFailedTransactions("ACC-001"))
+                        .thenReturn(List.of(duplicate, newFailure));
+
+                List<TransactionResponseDTO> result = accountService.getAccountTransactions("ACC-001");
+                assertThat(result).hasSize(2);
+                assertThat(result.get(0).getId()).isEqualTo("TXN-LOG"); // newest first
+                assertThat(result.get(1).getId()).isEqualTo("TXN-DB");
+            }
         }
 
         @Nested

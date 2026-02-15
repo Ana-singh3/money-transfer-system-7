@@ -9,8 +9,6 @@ import com.moneytransfersystem.domain.enums.Role;
 import com.moneytransfersystem.repository.AccountRepository;
 import com.moneytransfersystem.repository.TransactionLogRepository;
 import com.moneytransfersystem.repository.UserRepository;
-import com.moneytransfersystem.support.LocalMysqlTestDb;
-import com.moneytransfersystem.support.TestEnv;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,8 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,37 +28,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Single controller-level integration test.
- * Requires a local MySQL database/schema (moneytransfer_test).
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.datasource.url=jdbc:h2:mem:moneytransfer_integration;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.sql.init.mode=never"
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 @DisplayName("Transfer Controller – Integration")
 class TransferControllerIntegrationTest {
-
-    private static final String DB_NAME = "moneytransfer_test";
-
-    @DynamicPropertySource
-    static void dbProps(DynamicPropertyRegistry registry) {
-        String dbUser = TestEnv.get("DB_TEST_USERNAME", TestEnv.get("DB_USERNAME", "root"));
-        String dbPassword = TestEnv.get("DB_TEST_PASSWORD", TestEnv.get("DB_PASSWORD", ""));
-
-        LocalMysqlTestDb.ensureDatabaseExists(
-                "localhost",
-                3306,
-                "mysql",
-                dbUser,
-                dbPassword,
-                DB_NAME
-        );
-
-        registry.add("spring.datasource.url", () -> "jdbc:mysql://localhost:3306/" + DB_NAME);
-        registry.add("spring.datasource.username", () -> dbUser);
-        registry.add("spring.datasource.password", () -> dbPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-        registry.add("spring.sql.init.mode", () -> "never");
-    }
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;

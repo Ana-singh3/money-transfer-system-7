@@ -12,6 +12,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -49,6 +50,10 @@ public class WebMvcTestSecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Prefer returning 403 from the security layer (not from controller advice)
+                        // for role-based access control paths.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accounts/all").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/transfers").hasRole("USER")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )

@@ -2,6 +2,7 @@ package com.moneytransfersystem.controller;
 
 import com.moneytransfersystem.controller.support.WebMvcTestSecurityConfig;
 import com.moneytransfersystem.domain.dtos.AccountResponse;
+import com.moneytransfersystem.domain.dtos.TransactionResponseDTO;
 import com.moneytransfersystem.domain.exceptions.AccountNotFoundException;
 import com.moneytransfersystem.domain.exceptions.UnauthorizedAccessException;
 import com.moneytransfersystem.exception.GlobalExceptionHandler;
@@ -15,6 +16,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -89,6 +91,81 @@ class AccountControllerTest {
     }
 
     @Nested
+    @DisplayName("GET /api/v1/accounts/{id}/balance")
+    class GetBalance {
+
+        @Test
+        @DisplayName("200 with account balance")
+        @WithMockUser(roles = "USER")
+        void ok() throws Exception {
+            when(accountService.getAccountBalance("ACC-001")).thenReturn(new BigDecimal("1000.00"));
+
+            mockMvc.perform(get("/api/v1/accounts/ACC-001/balance"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.accountId").value("ACC-001"))
+                    .andExpect(jsonPath("$.balance").value(1000.00));
+        }
+
+        @Test
+        @DisplayName("403 when unauthorized access")
+        @WithMockUser(roles = "USER")
+        void forbidden() throws Exception {
+            when(accountService.getAccountBalance("ACC-002"))
+                    .thenThrow(new UnauthorizedAccessException("No access"));
+            mockMvc.perform(get("/api/v1/accounts/ACC-002/balance"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value("AUTH-403"));
+        }
+
+        @Test
+        @DisplayName("404 when account not found")
+        @WithMockUser(roles = "USER")
+        void notFound() throws Exception {
+            when(accountService.getAccountBalance("X")).thenThrow(new AccountNotFoundException("X"));
+            mockMvc.perform(get("/api/v1/accounts/X/balance"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value("ACC-404"));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/v1/accounts/{id}/transactions")
+    class GetTransactions {
+
+        @Test
+        @DisplayName("200 with transactions list")
+        @WithMockUser(roles = "USER")
+        void ok() throws Exception {
+            when(accountService.getAccountTransactions("ACC-001")).thenReturn(List.of(
+                    new TransactionResponseDTO("TXN-1", "ACC-001", "ACC-002",
+                            new BigDecimal("10.00"), "SUCCESS", null, Instant.parse("2026-02-12T10:11:12.000Z"))
+            ));
+
+            mockMvc.perform(get("/api/v1/accounts/ACC-001/transactions"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value("TXN-1"))
+                    .andExpect(jsonPath("$[0].status").value("SUCCESS"));
+        }
+
+        @Test
+        @DisplayName("404 when account not found")
+        @WithMockUser(roles = "USER")
+        void notFound() throws Exception {
+            when(accountService.getAccountTransactions("X")).thenThrow(new AccountNotFoundException("X"));
+            mockMvc.perform(get("/api/v1/accounts/X/transactions"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value("ACC-404"));
+        }
+
+        @Test
+        @DisplayName("401 when unauthenticated")
+        void unauthenticated() throws Exception {
+            mockMvc.perform(get("/api/v1/accounts/ACC-001/transactions"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
     @DisplayName("GET /api/v1/accounts/all")
     class GetAll {
 
@@ -104,6 +181,25 @@ class AccountControllerTest {
                 mockMvc.perform(get("/api/v1/accounts/all"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].accountId").value("ACC-001"));
+            }
+        }
+
+        @Nested
+        @DisplayName("Authorization failures")
+        class AuthorizationFailures {
+            @Test
+            @DisplayName("403 for USER role")
+            @WithMockUser(roles = "USER")
+            void forbiddenForUser() throws Exception {
+                mockMvc.perform(get("/api/v1/accounts/all"))
+                        .andExpect(status().isForbidden());
+            }
+
+            @Test
+            @DisplayName("401 when unauthenticated")
+            void unauthenticated() throws Exception {
+                mockMvc.perform(get("/api/v1/accounts/all"))
+                        .andExpect(status().isUnauthorized());
             }
         }
 

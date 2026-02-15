@@ -239,5 +239,39 @@ class TransferServiceImplTest {
         }
     }
 
+    @Nested
+    @DisplayName("Unexpected execution failures")
+    class UnexpectedExecutionFailures {
+
+        @Test
+        @DisplayName("logs FAILED transaction and rethrows when persistence fails mid-transfer")
+        void logsFailedAndRethrows() {
+            stubHappyPath();
+
+            // Fail on the 2nd save (destination account) to trigger executeTransfer catch block.
+            when(accountRepository.save(any())).thenAnswer(new org.mockito.stubbing.Answer<Account>() {
+                private int calls = 0;
+
+                @Override
+                public Account answer(org.mockito.invocation.InvocationOnMock invocation) {
+                    calls++;
+                    if (calls == 2) {
+                        throw new RuntimeException("DB down");
+                    }
+                    return invocation.getArgument(0);
+                }
+            });
+
+            assertThatThrownBy(() -> transferService.transfer(request))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("DB down");
+
+            ArgumentCaptor<TransactionLog> logCap = ArgumentCaptor.forClass(TransactionLog.class);
+            verify(transactionLogRepository).save(logCap.capture());
+            assertThat(logCap.getValue().getStatus()).isEqualTo(TransactionStatus.FAILED);
+            assertThat(logCap.getValue().getFailureReason()).contains("DB down");
+        }
+    }
+
 }
 

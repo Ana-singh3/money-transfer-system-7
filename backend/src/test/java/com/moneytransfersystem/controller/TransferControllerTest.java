@@ -110,6 +110,48 @@ class TransferControllerTest {
                         .andExpect(status().isUnauthorized());
             }
 
+            @Test
+            @DisplayName("403 when role is not USER")
+            @WithMockUser(roles = "ADMIN")
+            void forbiddenForAdmin() throws Exception {
+                mockMvc.perform(post("/api/v1/transfers").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validRequest)))
+                        .andExpect(status().isForbidden());
+            }
+
+        }
+
+        @Nested
+        @DisplayName("Service failures mapped by GlobalExceptionHandler")
+        class ServiceFailures {
+            @Test
+            @DisplayName("409 on duplicate transfer")
+            @WithMockUser(roles = "USER")
+            void duplicateTransfer() throws Exception {
+                when(transferService.transfer(any())).thenThrow(new DuplicateTransferException("KEY-1"));
+
+                mockMvc.perform(post("/api/v1/transfers").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validRequest)))
+                        .andExpect(status().isConflict())
+                        .andExpect(jsonPath("$.errorCode").value("TRX-409"));
+            }
+
+            @Test
+            @DisplayName("400 on insufficient balance")
+            @WithMockUser(roles = "USER")
+            void insufficientBalance() throws Exception {
+                when(transferService.transfer(any())).thenThrow(
+                        new InsufficentBalanceException("ACC-001", new BigDecimal("100.00"), new BigDecimal("0.00"))
+                );
+
+                mockMvc.perform(post("/api/v1/transfers").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validRequest)))
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.errorCode").value("TRX-400"));
+            }
         }
     }
 }

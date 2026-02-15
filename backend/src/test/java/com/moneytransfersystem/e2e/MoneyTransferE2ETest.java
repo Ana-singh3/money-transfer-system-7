@@ -7,17 +7,12 @@ import com.moneytransfersystem.domain.entities.User;
 import com.moneytransfersystem.repository.AccountRepository;
 import com.moneytransfersystem.repository.TransactionLogRepository;
 import com.moneytransfersystem.repository.UserRepository;
-import com.moneytransfersystem.support.LocalMysqlTestDb;
-import com.moneytransfersystem.support.TestEnv;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,44 +26,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Single end-to-end test: authenticate → transfer → verify balance → verify history.
- * Requires a local MySQL database/schema (moneytransfer_test).
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.datasource.url=jdbc:h2:mem:moneytransfer_e2e;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.sql.init.mode=never"
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 @DisplayName("Money Transfer – E2E")
 class MoneyTransferE2ETest {
 
-    private static final String DB_NAME = "moneytransfer_test";
-
-    @DynamicPropertySource
-    static void dbProps(DynamicPropertyRegistry registry) {
-        String dbUser = TestEnv.get("DB_TEST_USERNAME", TestEnv.get("DB_USERNAME", "root"));
-        String dbPassword = TestEnv.get("DB_TEST_PASSWORD", TestEnv.get("DB_PASSWORD", ""));
-
-        LocalMysqlTestDb.ensureDatabaseExists(
-                "localhost",
-                3306,
-                "mysql",
-                dbUser,
-                dbPassword,
-                DB_NAME
-        );
-
-        registry.add("spring.datasource.url", () -> "jdbc:mysql://localhost:3306/" + DB_NAME);
-        registry.add("spring.datasource.username", () -> dbUser);
-        registry.add("spring.datasource.password", () -> dbPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-        registry.add("spring.sql.init.mode", () -> "never");
-    }
-
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
     @Autowired private AccountRepository accountRepository;
     @Autowired private TransactionLogRepository transactionLogRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +55,6 @@ class MoneyTransferE2ETest {
         userRepository.deleteAll();
     }
 
-    @Disabled("Disabled: environment-dependent E2E balance assertion is failing in CI")
     @Test
     @DisplayName("Full flow: register → login → transfer → check balance → check history")
     void fullTransferFlow() throws Exception {
@@ -117,7 +94,8 @@ class MoneyTransferE2ETest {
 
         // ── 3. Fund alice's account (update balance directly – simulates deposit) ──
         Account aliceAccount = accountRepository.findById(aliceAccountId).orElseThrow();
-        aliceAccount.credit(new BigDecimal("1000.00"));
+        // Force a deterministic starting balance (implementation may seed default funds on registration)
+        aliceAccount.setBalance(new BigDecimal("1000.00").setScale(2));
         accountRepository.save(aliceAccount);
 
         // ── 4. Find bob's account ──
@@ -125,6 +103,11 @@ class MoneyTransferE2ETest {
         String bobAccountId = accountRepository.findAll().stream()
                 .filter(a -> a.getUser().getId().equals(bob.getId()))
                 .findFirst().orElseThrow().getId();
+
+        // Force deterministic starting balance for bob as well (default registration may seed funds)
+        Account bobAccount = accountRepository.findById(bobAccountId).orElseThrow();
+        bobAccount.setBalance(new BigDecimal("0.00").setScale(2));
+        accountRepository.save(bobAccount);
 
         // ── 5. Transfer 250 from alice to bob ──
         TransferRequest transferReq = new TransferRequest(aliceAccountId, bobAccountId,

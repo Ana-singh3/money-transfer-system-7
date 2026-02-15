@@ -74,6 +74,15 @@ class UserServiceImplTest {
         @DisplayName("Validation failures")
         class ValidationFailures {
             @Test
+            @DisplayName("throws when authentication is null")
+            void authenticationNull() {
+                when(securityContext.getAuthentication()).thenReturn(null);
+                assertThatThrownBy(() -> userService.getCurrentUser())
+                        .isInstanceOf(UsernameNotFoundException.class)
+                        .hasMessageContaining("not authenticated");
+            }
+
+            @Test
             @DisplayName("throws when not authenticated")
             void notAuthenticated() {
                 when(securityContext.getAuthentication()).thenReturn(authentication);
