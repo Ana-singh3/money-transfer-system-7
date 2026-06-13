@@ -53,3 +53,21 @@ CREATE TABLE IF NOT EXISTS TRANSACTION_LOGS (
   created_on TIMESTAMP_NTZ
 );
 
+CREATE TABLE IF NOT EXISTS REWARD_GRANTS (
+  reward_id VARCHAR,
+  user_id NUMBER(38,0),
+  transaction_id VARCHAR,
+  points NUMBER(38,0),
+  transaction_amount NUMBER(19,4),
+  created_on TIMESTAMP_NTZ
+);
+
+CREATE TABLE IF NOT EXISTS REWARD_REDEMPTIONS (
+  redemption_id VARCHAR,
+  user_id NUMBER(38,0),
+  transaction_id VARCHAR,
+  points_used NUMBER(38,0),
+  rupee_value NUMBER(19,4),
+  created_on TIMESTAMP_NTZ
+);
+

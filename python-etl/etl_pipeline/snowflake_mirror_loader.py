@@ -69,6 +69,30 @@ def ensure_mirror_tables(sf: SnowflakeClient, warehouse: str, database: str, sch
         )
         """
     )
+    sf.execute(
+        """
+        CREATE TABLE IF NOT EXISTS REWARD_GRANTS (
+          reward_id VARCHAR,
+          user_id NUMBER(38,0),
+          transaction_id VARCHAR,
+          points NUMBER(38,0),
+          transaction_amount NUMBER(19,4),
+          created_on TIMESTAMP_NTZ
+        )
+        """
+    )
+    sf.execute(
+        """
+        CREATE TABLE IF NOT EXISTS REWARD_REDEMPTIONS (
+          redemption_id VARCHAR,
+          user_id NUMBER(38,0),
+          transaction_id VARCHAR,
+          points_used NUMBER(38,0),
+          rupee_value NUMBER(19,4),
+          created_on TIMESTAMP_NTZ
+        )
+        """
+    )
 
 
 def merge_users(sf: SnowflakeClient, rows: list[tuple]) -> MergeCounts:
@@ -159,6 +183,68 @@ def merge_transaction_logs(sf: SnowflakeClient, rows: list[tuple]) -> MergeCount
           transaction_id, idempotency_key, from_account_id, to_account_id, amount, status, failure_reason, created_on
         ) VALUES (
           s.transaction_id, s.idempotency_key, s.from_account_id, s.to_account_id, s.amount, s.status, s.failure_reason, s.created_on
+        )
+    """
+    sf.executemany(sql, rows)
+    return MergeCounts(inserted=inserted, updated=updated)
+
+
+def merge_reward_grants(sf: SnowflakeClient, rows: list[tuple]) -> MergeCounts:
+    """
+    rows tuples:
+      (reward_id, user_id, transaction_id, points, transaction_amount, created_on)
+    """
+    keys = [r[0] for r in rows]
+    existing = _fetch_existing_string_keys(sf, "REWARD_GRANTS", "reward_id", keys)
+    inserted = sum(1 for k in keys if k not in existing)
+    updated = len(keys) - inserted
+
+    sql = """
+        MERGE INTO REWARD_GRANTS t
+        USING (
+          SELECT %s AS reward_id, %s AS user_id, %s AS transaction_id,
+                 %s AS points, %s AS transaction_amount, %s AS created_on
+        ) s
+        ON t.reward_id = s.reward_id
+        WHEN MATCHED THEN UPDATE SET
+          user_id = s.user_id,
+          transaction_id = s.transaction_id,
+          points = s.points,
+          transaction_amount = s.transaction_amount,
+          created_on = s.created_on
+        WHEN NOT MATCHED THEN INSERT (
+          reward_id, user_id, transaction_id, points, transaction_amount, created_on
+        ) VALUES (
+          s.reward_id, s.user_id, s.transaction_id, s.points, s.transaction_amount, s.created_on
+        )
+    """
+    sf.executemany(sql, rows)
+    return MergeCounts(inserted=inserted, updated=updated)
+
+
+def merge_reward_redemptions(sf: SnowflakeClient, rows: list[tuple]) -> MergeCounts:
+    keys = [r[0] for r in rows]
+    existing = _fetch_existing_string_keys(sf, "REWARD_REDEMPTIONS", "redemption_id", keys)
+    inserted = sum(1 for k in keys if k not in existing)
+    updated = len(keys) - inserted
+
+    sql = """
+        MERGE INTO REWARD_REDEMPTIONS t
+        USING (
+          SELECT %s AS redemption_id, %s AS user_id, %s AS transaction_id,
+                 %s AS points_used, %s AS rupee_value, %s AS created_on
+        ) s
+        ON t.redemption_id = s.redemption_id
+        WHEN MATCHED THEN UPDATE SET
+          user_id = s.user_id,
+          transaction_id = s.transaction_id,
+          points_used = s.points_used,
+          rupee_value = s.rupee_value,
+          created_on = s.created_on
+        WHEN NOT MATCHED THEN INSERT (
+          redemption_id, user_id, transaction_id, points_used, rupee_value, created_on
+        ) VALUES (
+          s.redemption_id, s.user_id, s.transaction_id, s.points_used, s.rupee_value, s.created_on
         )
     """
     sf.executemany(sql, rows)

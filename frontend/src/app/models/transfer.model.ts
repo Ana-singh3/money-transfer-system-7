@@ -3,6 +3,7 @@ export interface TransferRequest {
   toAccountId: string;
   amount: number;
   idempotencyKey: string;
+  rewardPointsToUse?: number;
 }
 
 export interface TransferResponse {
@@ -10,4 +11,6 @@ export interface TransferResponse {
   status: string;
   message: string;
   amount: number;
+  cashAmountPaid?: number;
+  rewardPointsUsed?: number;
 }

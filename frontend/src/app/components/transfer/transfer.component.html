@@ -29,6 +29,11 @@
         </span>
         <mat-spinner *ngIf="loadingBalance" diameter="24"></mat-spinner>
       </div>
+      <div class="balance-info reward-balance" *ngIf="!loadingRewards">
+        <span class="label">Reward Points (1 pt = ₹1)</span>
+        <span class="balance">{{ availableRewardPoints }} pts</span>
+      </div>
+      <mat-spinner *ngIf="loadingRewards" diameter="20" class="reward-spinner"></mat-spinner>
     </mat-card>
 
     <!-- Transfer Form Card -->
@@ -78,6 +83,31 @@
           
         </mat-form-field>
 
+        <div class="reward-payment-section" *ngIf="availableRewardPoints > 0">
+          <mat-checkbox formControlName="useRewardPoints" color="primary">
+            Pay with reward points (1 point = ₹1)
+          </mat-checkbox>
+
+          <mat-form-field appearance="outline" class="full-width" *ngIf="f['useRewardPoints'].value">
+            <mat-label>Reward points to use</mat-label>
+            <input matInput formControlName="rewardPointsToUse" type="number" min="0"
+              [max]="availableRewardPoints" step="1">
+            <mat-icon matPrefix>stars</mat-icon>
+            <mat-hint>Available: {{ availableRewardPoints }} points</mat-hint>
+          </mat-form-field>
+
+          <div class="payment-breakdown" *ngIf="f['useRewardPoints'].value && rewardPortion > 0">
+            <div class="breakdown-row">
+              <span>Reward points</span>
+              <span>{{ rewardPortion }} pts (₹{{ rewardPortion | number:'1.0-0' }})</span>
+            </div>
+            <div class="breakdown-row">
+              <span>Cash from account</span>
+              <span>₹{{ cashPortion | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button 
             mat-raised-button 
@@ -114,6 +144,14 @@
           <div class="detail-row">
             <span class="label">Amount:</span>
             <span class="value">₹{{ transferResult.amount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="transferResult.rewardPointsUsed">
+            <span class="label">Paid with rewards:</span>
+            <span class="value">{{ transferResult.rewardPointsUsed }} pts</span>
+          </div>
+          <div class="detail-row" *ngIf="transferResult.cashAmountPaid !== undefined">
+            <span class="label">Paid from balance:</span>
+            <span class="value">₹{{ transferResult.cashAmountPaid | number:'1.2-2' }}</span>
           </div>
           <div class="detail-row">
             <span class="label">From Account:</span>

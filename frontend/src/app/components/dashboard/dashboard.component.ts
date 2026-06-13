@@ -103,6 +103,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/history']);
   }
 
+  navigateToRewards(): void {
+    this.router.navigate(['/rewards']);
+  }
+
   refreshBalance(): void {
     this.loadBalance();
     this.snackBar.open('Balance refreshed', 'Close', {

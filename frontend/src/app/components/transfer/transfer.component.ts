@@ -10,10 +10,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
 import { TransferService } from '../../services/transfer.service';
 import { AccountService } from '../../services/account.service';
+import { RewardService } from '../../services/reward.service';
 import { TransferRequest, TransferResponse } from '../../models/transfer.model';
 import { BalanceResponse } from '../../models/account.model';
 import { AnimationsService } from '../../utils/animations.service';
@@ -32,6 +34,7 @@ import { AnimationsService } from '../../utils/animations.service';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatCheckboxModule,
     NavbarComponent
   ],
   templateUrl: './transfer.component.html',
@@ -46,7 +49,9 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
   accountId: string = '';
   holderName: string = '';
   currentBalance: number = 0;
+  availableRewardPoints: number = 0;
   loadingBalance = true;
+  loadingRewards = true;
   transferSuccess = false;
   transferResult: TransferResponse | null = null;
   redirecting = false;
@@ -58,6 +63,7 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
     private authService: AuthService,
     private transferService: TransferService,
     private accountService: AccountService,
+    private rewardService: RewardService,
     private router: Router,
     private snackBar: MatSnackBar,
     private animationsService: AnimationsService
@@ -69,13 +75,64 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
       this.accountId = currentUser.accountId;
       this.holderName = currentUser.holderName || currentUser.username;
       this.loadBalance();
+      this.loadRewardPoints();
     }
 
     this.transferForm = this.formBuilder.group({
-      // Must start with 'ACC-' and have 16 alphanumeric (uppercase/digits) characters after prefix
       toAccountId: ['', [Validators.required, Validators.pattern('^ACC-[A-Z0-9]{16}$')]],
-      amount: ['', [Validators.required, Validators.min(0.01), Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]]
+      amount: ['', [Validators.required, Validators.min(0.01), Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]],
+      useRewardPoints: [false],
+      rewardPointsToUse: [{ value: 0, disabled: true }, [Validators.min(0)]]
     });
+
+    this.transferForm.get('useRewardPoints')?.valueChanges.subscribe((use: boolean) => {
+      const pointsControl = this.transferForm.get('rewardPointsToUse');
+      if (use) {
+        pointsControl?.enable();
+        this.syncRewardPointsToUse();
+      } else {
+        pointsControl?.disable();
+        pointsControl?.setValue(0);
+      }
+    });
+
+    this.transferForm.get('amount')?.valueChanges.subscribe(() => {
+      if (this.transferForm.get('useRewardPoints')?.value) {
+        this.syncRewardPointsToUse();
+      }
+    });
+  }
+
+  loadRewardPoints(): void {
+    this.loadingRewards = true;
+    this.rewardService.getMyRewards().subscribe({
+      next: (summary) => {
+        this.availableRewardPoints = summary.availablePoints;
+        this.loadingRewards = false;
+      },
+      error: () => {
+        this.loadingRewards = false;
+      }
+    });
+  }
+
+  /** Auto-fill max usable points: min(transfer amount floor, available balance). */
+  syncRewardPointsToUse(): void {
+    const amount = parseFloat(this.transferForm.get('amount')?.value) || 0;
+    const maxPoints = Math.min(Math.floor(amount), this.availableRewardPoints);
+    this.transferForm.get('rewardPointsToUse')?.setValue(maxPoints);
+  }
+
+  get cashPortion(): number {
+    const amount = parseFloat(this.transferForm.get('amount')?.value) || 0;
+    const points = this.transferForm.get('useRewardPoints')?.value
+      ? (parseInt(this.transferForm.get('rewardPointsToUse')?.value, 10) || 0) : 0;
+    return Math.max(0, Math.round((amount - points) * 100) / 100);
+  }
+
+  get rewardPortion(): number {
+    if (!this.transferForm.get('useRewardPoints')?.value) return 0;
+    return parseInt(this.transferForm.get('rewardPointsToUse')?.value, 10) || 0;
   }
 
   ngAfterViewInit(): void {
@@ -125,18 +182,38 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (amount > this.currentBalance) {
-      this.snackBar.open('Insufficient balance', 'Close', {
-        duration: 4000,
-        panelClass: ['error-snackbar']
-      });
+    const useRewards = this.transferForm.get('useRewardPoints')?.value;
+    const rewardPoints = useRewards ? (parseInt(this.transferForm.get('rewardPointsToUse')?.value, 10) || 0) : 0;
+
+    if (useRewards && rewardPoints > 0) {
+      if (rewardPoints > this.availableRewardPoints) {
+        this.snackBar.open('Insufficient reward points', 'Close', {
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+      if (rewardPoints > amount) {
+        this.snackBar.open('Reward points cannot exceed transfer amount', 'Close', {
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+    }
+
+    if (this.cashPortion > this.currentBalance) {
+      this.snackBar.open(
+        useRewards ? 'Insufficient cash balance for remaining amount' : 'Insufficient balance',
+        'Close', { duration: 4000, panelClass: ['error-snackbar'] }
+      );
       return;
     }
 
-    this.executeTransfer(toAccountId, amount);
+    this.executeTransfer(toAccountId, amount, rewardPoints);
   }
 
-  executeTransfer(toAccountId: string, amount: number): void {
+  executeTransfer(toAccountId: string, amount: number, rewardPointsToUse: number = 0): void {
     this.loading = true;
     this.transferSuccess = false;
 
@@ -144,7 +221,8 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
       fromAccountId: this.accountId,
       toAccountId: toAccountId,
       amount: amount,
-      idempotencyKey: this.transferService.generateIdempotencyKey()
+      idempotencyKey: this.transferService.generateIdempotencyKey(),
+      rewardPointsToUse: rewardPointsToUse > 0 ? rewardPointsToUse : undefined
     };
 
     this.transferService.transfer(transferRequest).subscribe({
@@ -165,6 +243,7 @@ export class TransferComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.loadBalance();
+        this.loadRewardPoints();
 
         // start redirect countdown and show message
         this.startRedirectCountdown(10);

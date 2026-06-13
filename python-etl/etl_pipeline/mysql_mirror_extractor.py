@@ -53,6 +53,16 @@ class TransactionLogRow:
     created_on: datetime
 
 
+@dataclass(frozen=True)
+class RewardGrantRow:
+    reward_id: str
+    user_id: int
+    transaction_id: str
+    points: int
+    transaction_amount: Decimal
+    created_on: datetime
+
+
 def _connect(cfg: MySQLConfig):
     return mysql.connector.connect(
         host=cfg.host,
@@ -191,6 +201,114 @@ def _to_tx_row(r: dict[str, Any]) -> TransactionLogRow:
         status=(str(r["status"]) if r.get("status") is not None else None),
         failure_reason=(str(r["failure_reason"]) if r.get("failure_reason") is not None else None),
         # Treat MySQL timestamps as UTC-naive for this pipeline
+        created_on=created_on.replace(tzinfo=None),
+    )
+
+
+def extract_reward_grants_all(cfg: MySQLConfig) -> list[RewardGrantRow]:
+    sql = """
+        SELECT reward_id, user_id, transaction_id, points, transaction_amount, created_on
+        FROM reward_grants
+        ORDER BY created_on ASC
+    """
+    conn = _connect(cfg)
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        log.info("MySQL extracted REWARD_GRANTS rows=%s", len(rows))
+        return [_to_reward_row(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def extract_reward_grants_since(cfg: MySQLConfig, last_run_exclusive: datetime) -> list[RewardGrantRow]:
+    sql = """
+        SELECT reward_id, user_id, transaction_id, points, transaction_amount, created_on
+        FROM reward_grants
+        WHERE created_on > %s
+        ORDER BY created_on ASC
+    """
+    conn = _connect(cfg)
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql, (last_run_exclusive,))
+        rows = cur.fetchall()
+        log.info("MySQL extracted REWARD_GRANTS rows=%s", len(rows))
+        return [_to_reward_row(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def _to_reward_row(r: dict[str, Any]) -> RewardGrantRow:
+    created_on = r["created_on"]
+    if not isinstance(created_on, datetime):
+        raise TypeError(f"Unexpected created_on type: {type(created_on)}")
+    return RewardGrantRow(
+        reward_id=str(r["reward_id"]),
+        user_id=int(r["user_id"]),
+        transaction_id=str(r["transaction_id"]),
+        points=int(r["points"]),
+        transaction_amount=Decimal(str(r["transaction_amount"])),
+        created_on=created_on.replace(tzinfo=None),
+    )
+
+
+@dataclass(frozen=True)
+class RewardRedemptionRow:
+    redemption_id: str
+    user_id: int
+    transaction_id: str
+    points_used: int
+    rupee_value: Decimal
+    created_on: datetime
+
+
+def extract_reward_redemptions_all(cfg: MySQLConfig) -> list[RewardRedemptionRow]:
+    sql = """
+        SELECT redemption_id, user_id, transaction_id, points_used, rupee_value, created_on
+        FROM reward_redemptions
+        ORDER BY created_on ASC
+    """
+    conn = _connect(cfg)
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        log.info("MySQL extracted REWARD_REDEMPTIONS rows=%s", len(rows))
+        return [_to_redemption_row(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def extract_reward_redemptions_since(cfg: MySQLConfig, last_run_exclusive: datetime) -> list[RewardRedemptionRow]:
+    sql = """
+        SELECT redemption_id, user_id, transaction_id, points_used, rupee_value, created_on
+        FROM reward_redemptions
+        WHERE created_on > %s
+        ORDER BY created_on ASC
+    """
+    conn = _connect(cfg)
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql, (last_run_exclusive,))
+        rows = cur.fetchall()
+        log.info("MySQL extracted REWARD_REDEMPTIONS rows=%s", len(rows))
+        return [_to_redemption_row(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def _to_redemption_row(r: dict[str, Any]) -> RewardRedemptionRow:
+    created_on = r["created_on"]
+    if not isinstance(created_on, datetime):
+        raise TypeError(f"Unexpected created_on type: {type(created_on)}")
+    return RewardRedemptionRow(
+        redemption_id=str(r["redemption_id"]),
+        user_id=int(r["user_id"]),
+        transaction_id=str(r["transaction_id"]),
+        points_used=int(r["points_used"]),
+        rupee_value=Decimal(str(r["rupee_value"])),
         created_on=created_on.replace(tzinfo=None),
     )
 

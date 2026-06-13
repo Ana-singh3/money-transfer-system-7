@@ -32,6 +32,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/history/history.component').then(m => m.HistoryComponent),
     canActivate: [AuthGuard]
   },
+  { 
+    path: 'rewards', 
+    loadComponent: () => import('./components/rewards/rewards.component').then(m => m.RewardsComponent),
+    canActivate: [AuthGuard]
+  },
   {
     path: 'admin',
     children: [

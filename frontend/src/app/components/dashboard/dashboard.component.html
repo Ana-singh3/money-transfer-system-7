@@ -61,6 +61,14 @@
           <p>View all your transactions</p>
         </mat-card>
 
+        <mat-card class="action-card" (click)="navigateToRewards()">
+          <div class="action-icon rewards">
+            <mat-icon>stars</mat-icon>
+          </div>
+          <h3>Reward Points</h3>
+          <p>View and use your earned rewards</p>
+        </mat-card>
+
         <mat-card class="action-card" (click)="refreshBalance()">
           <div class="action-icon refresh">
             <mat-icon>account_balance</mat-icon>

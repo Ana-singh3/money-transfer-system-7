@@ -4,16 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountResponse {
-    private String accountId;
-    private String holderName;
-    private BigDecimal balance;
-    private String status;
-    private Integer availableRewardPoints;
+public class RewardRedemptionResponse {
+    private String redemptionId;
+    private String transactionId;
+    private int pointsUsed;
+    private BigDecimal rupeeValue;
+    private Instant redeemedOn;
 }

@@ -15,5 +15,13 @@ public final class IdGenerator {
     public static String generateTransactionId() {
         return "TXN-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
     }
+
+    public static String generateRewardId() {
+        return "RWD-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
+    }
+
+    public static String generateRedemptionId() {
+        return "RDM-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
+    }
 }
 

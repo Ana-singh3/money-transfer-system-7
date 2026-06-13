@@ -9,6 +9,7 @@ import com.moneytransfersystem.domain.entities.Account;
 import com.moneytransfersystem.domain.entities.User;
 import com.moneytransfersystem.domain.enums.AccountStatus;
 import com.moneytransfersystem.domain.enums.Role;
+import com.moneytransfersystem.domain.exceptions.AccountBlockedException;
 import com.moneytransfersystem.domain.exceptions.UsernameAlreadyExistsException;
 import com.moneytransfersystem.repository.AccountRepository;
 import com.moneytransfersystem.repository.UserRepository;
@@ -54,6 +55,14 @@ public class AuthServiceImpl implements AuthService {
                             request.getUsername());
                     return new UsernameNotFoundException("User not found: " + request.getUsername());
                 });
+
+        if (user.getRole() != Role.ROLE_ADMIN) {
+            List<Account> accounts = user.getAccounts();
+            if (accounts == null || accounts.isEmpty() || !accounts.get(0).isActive()) {
+                logger.warn("Login blocked | username={} | reason=ACCOUNT_BLOCKED", request.getUsername());
+                throw new AccountBlockedException();
+            }
+        }
 
         String token = jwtTokenProvider.generateToken(authentication);
 

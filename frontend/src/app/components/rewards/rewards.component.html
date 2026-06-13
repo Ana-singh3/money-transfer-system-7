@@ -1,0 +1,110 @@
+<app-navbar></app-navbar>
+
+<div class="rewards-container">
+  <div class="rewards-header">
+    <button mat-icon-button (click)="goBack()" class="back-button" aria-label="Back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>Reward Points</h1>
+      <p>Earn 1 point for every ₹100 transferred to another user</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="refreshRewards()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="rewards-content">
+    <!-- Total points summary card -->
+    <mat-card class="summary-card" *ngIf="!loading">
+      <mat-icon class="summary-icon">stars</mat-icon>
+      <div class="summary-text">
+        <span class="summary-label">Available Points (1 pt = ₹1)</span>
+        <span class="summary-value">{{ availablePoints }}</span>
+        <span class="summary-sub">Earned: {{ totalEarned }} · Used: {{ totalRedeemed }}</span>
+      </div>
+    </mat-card>
+
+    <mat-card class="rewards-card" #rewardsCard>
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading rewards...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && noRewards">
+        <mat-icon>card_giftcard</mat-icon>
+        <h3>No Rewards Yet</h3>
+        <p>Transfer more than ₹100 to another user to start earning reward points</p>
+      </div>
+
+      <div class="table-container" *ngIf="!loading && !noRewards">
+        <table mat-table [dataSource]="rewards" class="rewards-table">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Granted On</th>
+            <td mat-cell *matCellDef="let reward">
+              <div class="date-cell">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatDate(reward.grantedOn) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="transactionId">
+            <th mat-header-cell *matHeaderCellDef>Transaction</th>
+            <td mat-cell *matCellDef="let reward">
+              <span class="txn-id">{{ reward.transactionId }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Transfer Amount</th>
+            <td mat-cell *matCellDef="let reward">
+              ₹{{ reward.transactionAmount | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="points">
+            <th mat-header-cell *matHeaderCellDef>Points Earned</th>
+            <td mat-cell *matCellDef="let reward">
+              <span class="points-badge">+{{ reward.points }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <div class="reward-count" *ngIf="!loading && !noRewards">
+        <mat-icon>info</mat-icon>
+        <span>Showing {{ rewards.length }} grant(s)</span>
+      </div>
+    </mat-card>
+
+    <mat-card class="rewards-card redemptions-card" *ngIf="!loading && redemptions.length > 0">
+      <h3 class="section-title">
+        <mat-icon>redeem</mat-icon>
+        Points Used on Transfers
+      </h3>
+      <div class="table-container">
+        <table mat-table [dataSource]="redemptions" class="rewards-table">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let r">{{ formatDate(r.redeemedOn) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="transactionId">
+            <th mat-header-cell *matHeaderCellDef>Transaction</th>
+            <td mat-cell *matCellDef="let r"><span class="txn-id">{{ r.transactionId }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="points">
+            <th mat-header-cell *matHeaderCellDef>Points Used</th>
+            <td mat-cell *matCellDef="let r"><span class="points-used">-{{ r.pointsUsed }}</span></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="redemptionColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: redemptionColumns;"></tr>
+        </table>
+      </div>
+    </mat-card>
+  </div>
+</div>

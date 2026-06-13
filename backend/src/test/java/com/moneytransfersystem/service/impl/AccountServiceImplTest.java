@@ -11,8 +11,11 @@ import com.moneytransfersystem.domain.enums.TransactionStatus;
 import com.moneytransfersystem.domain.exceptions.AccountNotFoundException;
 import com.moneytransfersystem.domain.exceptions.UnauthorizedAccessException;
 import com.moneytransfersystem.repository.AccountRepository;
+import com.moneytransfersystem.repository.RewardGrantRepository;
+import com.moneytransfersystem.repository.RewardRedemptionRepository;
 import com.moneytransfersystem.repository.TransactionLogRepository;
 import com.moneytransfersystem.service.ErrorLogService;
+import com.moneytransfersystem.service.RewardService;
 import com.moneytransfersystem.service.UserService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +37,10 @@ class AccountServiceImplTest {
 
     @Mock private AccountRepository accountRepository;
     @Mock private TransactionLogRepository transactionLogRepository;
+    @Mock private RewardGrantRepository rewardGrantRepository;
+    @Mock private RewardRedemptionRepository rewardRedemptionRepository;
     @Mock private UserService userService;
+    @Mock private RewardService rewardService;
     @Mock private ErrorLogService errorLogService;
     @InjectMocks private AccountServiceImpl accountService;
 
@@ -77,6 +83,7 @@ class AccountServiceImplTest {
                 when(accountRepository.findByIdWithUser("ACC-001")).thenReturn(Optional.of(account));
                 when(userService.getCurrentUser()).thenReturn(owner);
                 when(userService.isAdmin(owner)).thenReturn(false);
+                when(rewardService.getAvailablePoints(1L)).thenReturn(12);
 
                 AccountResponse r = accountService.getAccountById("ACC-001");
 
@@ -84,6 +91,7 @@ class AccountServiceImplTest {
                 assertThat(r.getHolderName()).isEqualTo("Owner");
                 assertThat(r.getBalance()).isEqualByComparingTo("1000.00");
                 assertThat(r.getStatus()).isEqualTo("ACTIVE");
+                assertThat(r.getAvailableRewardPoints()).isEqualTo(12);
             }
 
             @Test
@@ -92,6 +100,7 @@ class AccountServiceImplTest {
                 when(accountRepository.findByIdWithUser("ACC-001")).thenReturn(Optional.of(account));
                 when(userService.getCurrentUser()).thenReturn(admin);
                 when(userService.isAdmin(admin)).thenReturn(true);
+                when(rewardService.getAvailablePoints(1L)).thenReturn(0);
 
                 AccountResponse r = accountService.getAccountById("ACC-001");
                 assertThat(r.getAccountId()).isEqualTo("ACC-001");
@@ -250,7 +259,10 @@ class AccountServiceImplTest {
             @DisplayName("maps all accounts to response DTOs")
             void mapsAccounts() {
                 Account a2 = new Account("ACC-002", "Other", new BigDecimal("500.00"), AccountStatus.ACTIVE);
+                a2.setUser(owner);
+                when(userService.isAdmin()).thenReturn(true);
                 when(accountRepository.findAll()).thenReturn(List.of(account, a2));
+                when(rewardService.getAvailablePoints(1L)).thenReturn(0);
 
                 List<AccountResponse> result = accountService.getAllAccounts();
                 assertThat(result).hasSize(2);

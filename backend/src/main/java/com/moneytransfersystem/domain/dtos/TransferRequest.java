@@ -26,4 +26,7 @@ public class TransferRequest {
 
     @NotNull
     private String idempotencyKey;
+
+    /** Optional reward points to apply toward payment (1 point = ₹1). */
+    private Integer rewardPointsToUse;
 }

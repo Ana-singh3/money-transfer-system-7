@@ -1,7 +1,9 @@
 package com.moneytransfersystem.controller;
 
+import com.moneytransfersystem.domain.dtos.AccountHistoryItemDTO;
 import com.moneytransfersystem.domain.dtos.AccountResponse;
 import com.moneytransfersystem.domain.dtos.TransactionResponseDTO;
+import com.moneytransfersystem.domain.dtos.UpdateAccountStatusRequest;
 import com.moneytransfersystem.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +66,22 @@ public class AccountController {
     public ResponseEntity<List<TransactionResponseDTO>> getAccountTransactions(@PathVariable String id) {
         List<TransactionResponseDTO> transactions = accountService.getAccountTransactions(id);
         return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Get account history", description = "Transfers plus reward credit/debit entries.")
+    public ResponseEntity<List<AccountHistoryItemDTO>> getAccountHistory(@PathVariable String id) {
+        return ResponseEntity.ok(accountService.getAccountHistory(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Activate or deactivate account (Admin only)")
+    public ResponseEntity<AccountResponse> updateAccountStatus(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateAccountStatusRequest request) {
+        return ResponseEntity.ok(accountService.updateAccountStatus(id, request.getStatus()));
     }
 
     @GetMapping("/all")

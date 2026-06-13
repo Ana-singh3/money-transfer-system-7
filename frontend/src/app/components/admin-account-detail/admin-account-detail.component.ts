@@ -11,23 +11,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
 import { AccountService } from '../../services/account.service';
-import { AccountResponse } from '../../models/account.model';
-import { TransactionResponse } from '../../models/transaction.model';
+import { AccountHistoryItem, AccountResponse } from '../../models/account.model';
 import { AnimationsService } from '../../utils/animations.service';
 
 @Component({
   selector: 'app-admin-account-detail',
   standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    MatChipsModule,
-    NavbarComponent
+    CommonModule, MatCardModule, MatTableModule, MatButtonModule,
+    MatIconModule, MatProgressSpinnerModule, MatSnackBarModule,
+    MatChipsModule, NavbarComponent
   ],
   templateUrl: './admin-account-detail.component.html',
   styleUrls: ['./admin-account-detail.component.scss']
@@ -35,13 +28,14 @@ import { AnimationsService } from '../../utils/animations.service';
 export class AdminAccountDetailComponent implements OnInit, AfterViewInit {
   @ViewChild('accountCard', { static: false }) accountCard!: ElementRef;
   @ViewChild('transactionsCard', { static: false }) transactionsCard!: ElementRef;
-  
-  accountId: string = '';
+
+  accountId = '';
   account: AccountResponse | null = null;
-  transactions: TransactionResponse[] = [];
-  displayedColumns: string[] = ['date', 'fromAccount', 'toAccount', 'amount', 'status'];
+  history: AccountHistoryItem[] = [];
+  displayedColumns = ['date', 'type', 'fromAccount', 'toAccount', 'amount', 'points', 'status'];
   loading = true;
-  loadingTransactions = true;
+  loadingHistory = true;
+  updatingStatus = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,80 +47,76 @@ export class AdminAccountDetailComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    const currentUser = this.authService.currentUserValue;
-    if (!currentUser || currentUser.role !== 'ROLE_ADMIN') {
+    const user = this.authService.currentUserValue;
+    if (!user || user.role !== 'ROLE_ADMIN') {
       this.router.navigate(['/auth']);
       return;
     }
-
     this.accountId = this.route.snapshot.paramMap.get('id') || '';
     if (this.accountId) {
       this.loadAccountDetails();
-      this.loadTransactions();
+      this.loadHistory();
     }
   }
 
   ngAfterViewInit(): void {
-    if (this.accountCard) {
-      this.animationsService.fadeIn(this.accountCard.nativeElement, 0.6);
-    }
-    if (this.transactionsCard) {
-      this.animationsService.fadeIn(this.transactionsCard.nativeElement, 0.6);
-    }
+    if (this.accountCard) this.animationsService.fadeIn(this.accountCard.nativeElement, 0.6);
+    if (this.transactionsCard) this.animationsService.fadeIn(this.transactionsCard.nativeElement, 0.6);
   }
 
   loadAccountDetails(): void {
     this.loading = true;
     this.accountService.getAccount(this.accountId).subscribe({
-      next: (account: AccountResponse) => {
-        this.account = account;
+      next: (account) => { this.account = account; this.loading = false; },
+      error: () => {
         this.loading = false;
-      },
-      error: (error) => {
-        this.loading = false;
-        this.snackBar.open('Failed to load account details', 'Close', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+        this.snackBar.open('Failed to load account details', 'Close', { duration: 3000 });
         this.router.navigate(['/admin/dashboard']);
       }
     });
   }
 
-  loadTransactions(): void {
-    this.loadingTransactions = true;
-    this.accountService.getTransactions(this.accountId).subscribe({
-      next: (transactions: TransactionResponse[]) => {
-        this.transactions = transactions.sort((a, b) => {
-          return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
-        });
-        this.loadingTransactions = false;
-        
-        setTimeout(() => {
-          const rows = document.querySelectorAll('.transactions-table tbody tr');
-          if (rows.length > 0) {
-            this.animationsService.staggerFadeIn(Array.from(rows) as HTMLElement[], 0.05);
-          }
-        }, 100);
+  loadHistory(): void {
+    this.loadingHistory = true;
+    this.accountService.getAccountHistory(this.accountId).subscribe({
+      next: (items) => {
+        this.history = items;
+        this.loadingHistory = false;
       },
-      error: (error) => {
-        this.loadingTransactions = false;
-        this.snackBar.open('Failed to load transactions', 'Close', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
+      error: () => {
+        this.loadingHistory = false;
+        this.snackBar.open('Failed to load history', 'Close', { duration: 3000 });
       }
     });
   }
 
+  toggleAccountStatus(): void {
+    if (!this.account || this.updatingStatus) return;
+    const newStatus = this.account.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
+    const action = newStatus === 'LOCKED' ? 'deactivated' : 'activated';
+    this.updatingStatus = true;
+    this.accountService.updateAccountStatus(this.accountId, newStatus).subscribe({
+      next: (updated) => {
+        this.account = updated;
+        this.updatingStatus = false;
+        this.snackBar.open(`Account ${action} successfully`, 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.updatingStatus = false;
+        this.snackBar.open('Failed to update account status', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  getEntryTypeLabel(item: AccountHistoryItem): string {
+    if (item.entryType === 'REWARD_CREDIT') return 'Reward Credit';
+    if (item.entryType === 'REWARD_DEBIT') return 'Reward Debit';
+    return 'Transfer';
+  }
+
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   }
 
@@ -134,8 +124,12 @@ export class AdminAccountDetailComponent implements OnInit, AfterViewInit {
     return `₹${balance.toFixed(2)}`;
   }
 
+  formatPoints(item: AccountHistoryItem): string {
+    if (item.points == null) return '—';
+    return item.points > 0 ? `+${item.points}` : `${item.points}`;
+  }
+
   goBack(): void {
     this.router.navigate(['/admin/dashboard']);
   }
 }
-

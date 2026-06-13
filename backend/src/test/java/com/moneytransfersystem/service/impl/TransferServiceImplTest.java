@@ -25,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,7 @@ class TransferServiceImplTest {
     @Mock private AccountRepository accountRepository;
     @Mock private TransactionLogRepository transactionLogRepository;
     @Mock private UserService userService;
+    @Mock private com.moneytransfersystem.service.RewardService rewardService;
     @InjectMocks private TransferServiceImpl transferService;
 
     private User owner;
@@ -66,9 +68,11 @@ class TransferServiceImplTest {
     private void stubHappyPath() {
         when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
         when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-        when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+        when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
         when(userService.getCurrentUser()).thenReturn(owner);
         when(userService.isAdmin(owner)).thenReturn(false);
+        when(rewardService.resolveCashAmount(eq(owner), any(), any())).thenAnswer(
+                inv -> inv.getArgument(1));
         when(transactionLogRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     }
 
@@ -106,9 +110,11 @@ class TransferServiceImplTest {
 
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
             when(userService.getCurrentUser()).thenReturn(admin);
             when(userService.isAdmin(admin)).thenReturn(true);
+            when(rewardService.resolveCashAmount(eq(owner), any(), any())).thenAnswer(
+                    inv -> inv.getArgument(1));
             when(transactionLogRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             TransferResponse resp = transferService.transfer(request);
@@ -172,7 +178,7 @@ class TransferServiceImplTest {
         void destNotFound() {
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.empty());
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> transferService.transfer(request))
                     .isInstanceOf(AccountNotFoundException.class);
@@ -184,7 +190,7 @@ class TransferServiceImplTest {
             fromAccount.setStatus(AccountStatus.LOCKED);
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
             when(userService.getCurrentUser()).thenReturn(owner);
             when(userService.isAdmin(owner)).thenReturn(false);
 
@@ -193,17 +199,23 @@ class TransferServiceImplTest {
         }
 
         @Test
-        @DisplayName("throws when destination account is inactive")
+        @DisplayName("throws when destination account is inactive and logs FAILED transaction")
         void destInactive() {
-            toAccount.setStatus(AccountStatus.CLOSED);
+            toAccount.setStatus(AccountStatus.LOCKED);
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
             when(userService.getCurrentUser()).thenReturn(owner);
             when(userService.isAdmin(owner)).thenReturn(false);
+            when(transactionLogRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             assertThatThrownBy(() -> transferService.transfer(request))
                     .isInstanceOf(AccountNotActiveException.class);
+
+            ArgumentCaptor<TransactionLog> logCap = ArgumentCaptor.forClass(TransactionLog.class);
+            verify(transactionLogRepository).save(logCap.capture());
+            assertThat(logCap.getValue().getStatus()).isEqualTo(TransactionStatus.FAILED);
+            assertThat(logCap.getValue().getFailureReason()).contains("deactivated");
         }
 
         @Test
@@ -212,9 +224,11 @@ class TransferServiceImplTest {
             request.setAmount(new BigDecimal("9999.00"));
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
             when(userService.getCurrentUser()).thenReturn(owner);
             when(userService.isAdmin(owner)).thenReturn(false);
+            when(rewardService.resolveCashAmount(eq(owner), any(), any())).thenAnswer(
+                    inv -> inv.getArgument(1));
 
             assertThatThrownBy(() -> transferService.transfer(request))
                     .isInstanceOf(InsufficentBalanceException.class);
@@ -230,7 +244,7 @@ class TransferServiceImplTest {
         void strangerBlocked() {
             when(transactionLogRepository.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
             when(accountRepository.findByIdWithUser("ACC-FROM")).thenReturn(Optional.of(fromAccount));
-            when(accountRepository.findById("ACC-TO")).thenReturn(Optional.of(toAccount));
+            when(accountRepository.findByIdWithUser("ACC-TO")).thenReturn(Optional.of(toAccount));
             when(userService.getCurrentUser()).thenReturn(stranger);
             when(userService.isAdmin(stranger)).thenReturn(false);
 

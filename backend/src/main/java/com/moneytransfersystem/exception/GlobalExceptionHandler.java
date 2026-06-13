@@ -1,9 +1,11 @@
 package com.moneytransfersystem.exception;
 
 import com.moneytransfersystem.domain.dtos.ErrorResponse;
+import com.moneytransfersystem.domain.exceptions.AccountBlockedException;
 import com.moneytransfersystem.domain.exceptions.AccountNotActiveException;
 import com.moneytransfersystem.domain.exceptions.AccountNotFoundException;
 import com.moneytransfersystem.domain.exceptions.DuplicateTransferException;
+import com.moneytransfersystem.domain.exceptions.InsufficientRewardPointsException;
 import com.moneytransfersystem.domain.exceptions.InsufficentBalanceException;
 import com.moneytransfersystem.domain.exceptions.UnauthorizedAccessException;
 import com.moneytransfersystem.domain.exceptions.UsernameAlreadyExistsException;
@@ -32,11 +34,25 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("ACC-404", ex.getMessage()));
     }
 
+    @ExceptionHandler(AccountBlockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountBlocked(AccountBlockedException ex) {
+        logger.warn("Exception caught | type=AccountBlockedException | message={}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("AUTH-403-BLOCKED", ex.getMessage()));
+    }
+
     @ExceptionHandler(AccountNotActiveException.class)
     public ResponseEntity<ErrorResponse> handleAccountNotActive(AccountNotActiveException ex) {
         logger.error("Exception caught | type=AccountNotActiveException | message={}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse("ACC-403", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientRewardPointsException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientRewardPoints(InsufficientRewardPointsException ex) {
+        logger.warn("Exception caught | type=InsufficientRewardPointsException | message={}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("RWD-400", ex.getMessage()));
     }
 
     @ExceptionHandler(InsufficentBalanceException.class)
