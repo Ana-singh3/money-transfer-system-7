@@ -39,7 +39,7 @@ class TransferControllerTest {
 
     @BeforeEach
     void setUp() {
-        validRequest = new TransferRequest("ACC-001", "ACC-002", new BigDecimal("100.00"), "KEY-1");
+        validRequest = new TransferRequest("ACC-001", "ACC-002", new BigDecimal("100.00"), "KEY-1",1);
     }
 
     @Nested
@@ -74,7 +74,7 @@ class TransferControllerTest {
             @DisplayName("422 on invalid request body")
             @WithMockUser(roles = "USER")
             void validationError() throws Exception {
-                TransferRequest bad = new TransferRequest("ACC-001", "ACC-002", BigDecimal.ZERO, "KEY-1");
+                TransferRequest bad = new TransferRequest("ACC-001", "ACC-002", BigDecimal.ZERO, "KEY-1",1);
 
                 mockMvc.perform(post("/api/v1/transfers").with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)

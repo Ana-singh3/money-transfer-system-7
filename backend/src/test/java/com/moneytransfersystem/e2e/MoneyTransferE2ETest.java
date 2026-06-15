@@ -111,7 +111,7 @@ class MoneyTransferE2ETest {
 
         // ── 5. Transfer 250 from alice to bob ──
         TransferRequest transferReq = new TransferRequest(aliceAccountId, bobAccountId,
-                new BigDecimal("250.00"), "E2E-KEY-001");
+                new BigDecimal("250.00"), "E2E-KEY-001",1);
 
         MvcResult transferResult = mockMvc.perform(post("/api/v1/transfers")
                         .header("Authorization", "Bearer " + token)

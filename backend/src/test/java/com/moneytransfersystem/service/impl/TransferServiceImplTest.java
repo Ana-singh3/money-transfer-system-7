@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -36,6 +37,7 @@ class TransferServiceImplTest {
     @Mock private TransactionLogRepository transactionLogRepository;
     @Mock private UserService userService;
     @Mock private com.moneytransfersystem.service.RewardService rewardService;
+    @Mock private PlatformTransactionManager transactionManager;
     @InjectMocks private TransferServiceImpl transferService;
 
     private User owner;
@@ -62,7 +64,7 @@ class TransferServiceImplTest {
         toAccount = new Account("ACC-TO", "Receiver", new BigDecimal("500.00"), AccountStatus.ACTIVE);
         toAccount.setUser(stranger);
 
-        request = new TransferRequest("ACC-FROM", "ACC-TO", new BigDecimal("200.00"), "KEY-1");
+        request = new TransferRequest("ACC-FROM", "ACC-TO", new BigDecimal("200.00"), "KEY-1",1);
     }
 
     private void stubHappyPath() {

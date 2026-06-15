@@ -43,7 +43,7 @@ class AccountControllerTest {
             @DisplayName("200 with account details")
             @WithMockUser(roles = "USER")
             void ok() throws Exception {
-                AccountResponse r = new AccountResponse("ACC-001", "Owner", new BigDecimal("1000.00"), "ACTIVE");
+                AccountResponse r = new AccountResponse("ACC-001", "Owner", new BigDecimal("1000.00"), "ACTIVE",1);
                 when(accountService.getAccountById("ACC-001")).thenReturn(r);
 
                 mockMvc.perform(get("/api/v1/accounts/ACC-001"))
@@ -177,7 +177,7 @@ class AccountControllerTest {
             @WithMockUser(roles = "ADMIN")
             void adminOk() throws Exception {
                 when(accountService.getAllAccounts()).thenReturn(List.of(
-                        new AccountResponse("ACC-001", "A", BigDecimal.TEN, "ACTIVE")));
+                        new AccountResponse("ACC-001", "A", BigDecimal.TEN, "ACTIVE",1)));
                 mockMvc.perform(get("/api/v1/accounts/all"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].accountId").value("ACC-001"));

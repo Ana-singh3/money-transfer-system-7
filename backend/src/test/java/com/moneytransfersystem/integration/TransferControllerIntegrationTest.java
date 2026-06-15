@@ -104,7 +104,7 @@ class TransferControllerIntegrationTest {
         @Test
         @DisplayName("201 – successful transfer persists correct balances")
         void successfulTransfer() throws Exception {
-            TransferRequest req = new TransferRequest("ACC-SEND", "ACC-RECV", new BigDecimal("200.00"), "INT-KEY-1");
+            TransferRequest req = new TransferRequest("ACC-SEND", "ACC-RECV", new BigDecimal("200.00"), "INT-KEY-1",1);
 
             mockMvc.perform(post("/api/v1/transfers")
                             .header("Authorization", "Bearer " + authToken)
@@ -125,7 +125,7 @@ class TransferControllerIntegrationTest {
         @Test
         @DisplayName("422 – validation error on zero amount")
         void validationError() throws Exception {
-            TransferRequest req = new TransferRequest("ACC-SEND", "ACC-RECV", BigDecimal.ZERO, "INT-KEY-2");
+            TransferRequest req = new TransferRequest("ACC-SEND", "ACC-RECV", BigDecimal.ZERO, "INT-KEY-2",1);
 
             mockMvc.perform(post("/api/v1/transfers")
                             .header("Authorization", "Bearer " + authToken)
